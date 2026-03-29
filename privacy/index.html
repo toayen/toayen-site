@@ -6,19 +6,31 @@
     <title>Privacy Policy - Toayen</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-    <div class="container">
-        <a href="/" class="back-link">&larr; Back to toayen.co.uk</a>
+    <div class="policy-header">
+        <div class="policy-header-inner">
+            <a href="/" class="logo-small">
+                <span class="logo-icon">T</span>
+                <span class="logo-text">toayen</span>
+            </a>
+            <nav>
+                <a href="/privacy" class="active">Privacy</a>
+                <a href="/terms">Terms</a>
+            </nav>
+        </div>
+    </div>
 
-        <div class="policy">
-            <h1>privacy policy</h1>
-            <p class="effective">Effective date: 29 March 2026</p>
+    <div class="policy-hero">
+        <h1>privacy policy</h1>
+        <p class="effective">Effective 29 March 2026</p>
+        <p class="intro">Toayen is a gift-planning app for iPhone, iPad, and Apple Watch. Your privacy matters to us. This policy explains what data we collect, how we use it, and your rights.</p>
+    </div>
 
-            <p>Toayen ("the App") is a gift-planning app for iPhone, iPad, and Apple Watch. Your privacy matters to us. This policy explains what data we collect, how we use it, and your rights.</p>
-
-            <h2>1. data stored on your device</h2>
+    <div class="policy-body">
+        <div class="policy-section">
+            <h2>1. Data stored on your device</h2>
             <p>The majority of your data never leaves your device. The following is stored locally using Apple's SwiftData framework and is not transmitted to any server:</p>
             <ul>
                 <li>People you add (names, birthdays, interests, sizes, notes)</li>
@@ -27,16 +39,20 @@
                 <li>Voice note recordings and transcriptions</li>
             </ul>
             <p>This data is included in your iCloud backup if you have iCloud enabled, under Apple's own privacy terms.</p>
+        </div>
 
-            <h2>2. account and authentication</h2>
+        <div class="policy-section">
+            <h2>2. Account and authentication</h2>
             <p>If you choose to sign in (optional, required only for AI features), we use Sign in with Apple. We receive:</p>
             <ul>
                 <li>A unique Apple user identifier</li>
                 <li>Your email address (or Apple's private relay address if you choose to hide it)</li>
             </ul>
             <p>We store this in our database (hosted on Supabase) solely to authenticate your AI suggestion requests and manage your subscription.</p>
+        </div>
 
-            <h2>3. ai suggestion features</h2>
+        <div class="policy-section">
+            <h2>3. AI suggestion features</h2>
             <p>When you request personalised gift suggestions, we send the following to our server to generate recommendations:</p>
             <ul>
                 <li>The person's name, relationship, age range, gender, location, interests, dislikes, and sizes</li>
@@ -46,31 +62,45 @@
             </ul>
             <p>This data is processed by Anthropic's Claude AI via our secure server-side proxy. We do not store the content of your requests or the AI responses on our servers. We do log anonymised usage counts and token usage for billing purposes.</p>
             <p>Anthropic's data handling is governed by their <a href="https://www.anthropic.com/privacy" target="_blank">privacy policy</a>. Per their commercial API terms, your data is not used to train their models.</p>
+        </div>
 
-            <h2>4. usage tracking</h2>
+        <div class="policy-section">
+            <h2>4. Usage tracking</h2>
             <p>We track the number of AI requests you make each month to enforce free and premium tier limits. We store:</p>
             <ul>
                 <li>Monthly request counts (suggestions and guide refreshes)</li>
                 <li>Token counts and estimated cost (for our internal cost management)</li>
             </ul>
             <p>This data is linked to your account ID and cannot identify you personally.</p>
+        </div>
 
-            <h2>5. subscriptions</h2>
+        <div class="policy-section">
+            <h2>5. Subscriptions</h2>
             <p>Subscriptions are processed entirely by Apple through StoreKit 2. We do not collect or store any payment information. We receive subscription status updates (active, expired, renewed) to determine your tier.</p>
+        </div>
 
-            <h2>6. analytics and tracking</h2>
+        <div class="policy-section">
+            <h2>6. Analytics and tracking</h2>
             <p>We do not use any third-party analytics, advertising SDKs, or tracking frameworks. We do not track your behaviour, build advertising profiles, or sell your data to anyone.</p>
+        </div>
 
-            <h2>7. data sharing</h2>
+        <div class="policy-section">
+            <h2>7. Data sharing</h2>
             <p>We do not sell, rent, or share your personal data with third parties. The only external service that receives any of your data is Anthropic (for AI features), as described above.</p>
+        </div>
 
-            <h2>8. data retention and deletion</h2>
+        <div class="policy-section">
+            <h2>8. Data retention and deletion</h2>
             <p>Your on-device data persists until you delete the app or remove it manually. Your server-side account data (email, usage counts, subscription events) can be permanently deleted at any time by tapping "Delete Account" in the app's Settings. This immediately removes all your data from our servers.</p>
+        </div>
 
-            <h2>9. children's privacy</h2>
+        <div class="policy-section">
+            <h2>9. Children's privacy</h2>
             <p>Toayen is not directed at children under 13. We do not knowingly collect personal information from children.</p>
+        </div>
 
-            <h2>10. your rights</h2>
+        <div class="policy-section">
+            <h2>10. Your rights</h2>
             <p>You can:</p>
             <ul>
                 <li>Use the app without signing in (AI features will be unavailable)</li>
@@ -78,17 +108,20 @@
                 <li>Delete your account and all server-side data at any time from Settings</li>
                 <li>Request a copy of your server-side data by contacting us</li>
             </ul>
-
-            <h2>11. changes to this policy</h2>
-            <p>We may update this policy from time to time. We will notify you of material changes through the app or by updating the effective date above.</p>
-
-            <h2>12. contact</h2>
-            <p>If you have questions about this privacy policy, contact us at <a href="mailto:info@toayen.co.uk">info@toayen.co.uk</a>.</p>
         </div>
 
-        <footer>
+        <div class="policy-section">
+            <h2>11. Changes to this policy</h2>
+            <p>We may update this policy from time to time. We will notify you of material changes through the app or by updating the effective date above.</p>
+        </div>
+
+        <div class="policy-contact">
+            <p>Questions? Contact us at <a href="mailto:info@toayen.co.uk">info@toayen.co.uk</a></p>
+        </div>
+
+        <div class="policy-footer">
             <p>&copy; 2026 Toayen. Made with care.</p>
-        </footer>
+        </div>
     </div>
 </body>
 </html>
