@@ -7,9 +7,10 @@
     <title>A Toayen Card</title>
     <!--
         This page is deliberately self-contained: no stylesheets, no fonts,
-        no scripts, no images fetched from anywhere. The card details travel
-        in the URL fragment (#...), which browsers never send to any server,
-        and this page never sends them anywhere either.
+        no scripts, and nothing fetched from outside toayen.co.uk (the one
+        image is our own logo, which carries no card data). The card details
+        travel in the URL fragment (#...), which browsers never send to any
+        server, and this page never sends them anywhere either.
     -->
     <style>
         * {
@@ -49,16 +50,10 @@
         }
 
         .logo-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-block;
             width: 36px;
             height: 36px;
-            background: #2C2C2C;
             border-radius: 22%;
-            color: white;
-            font-weight: 200;
-            font-size: 18px;
         }
 
         .logo-text {
@@ -330,7 +325,7 @@
     <div class="container">
         <header>
             <a href="/" class="logo-small">
-                <span class="logo-icon">T</span>
+                <img class="logo-icon" src="/assets/logo-256.png" alt="">
                 <span class="logo-text">toayen</span>
             </a>
         </header>

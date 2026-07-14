@@ -29,17 +29,10 @@ header {
 }
 
 .logo {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
     width: 64px;
     height: 64px;
-    background: #2C2C2C;
     border-radius: 22%;
-    color: white;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 200;
-    font-size: 32px;
     margin-bottom: 16px;
 }
 
@@ -108,17 +101,10 @@ nav a:hover {
 }
 
 .policy-header .logo-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
     width: 36px;
     height: 36px;
-    background: #2C2C2C;
     border-radius: 22%;
-    color: white;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 200;
-    font-size: 18px;
 }
 
 .policy-header .logo-text {
