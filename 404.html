@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>A Toayen Card</title>
+    <!--
+        GitHub Pages serves this file for any path without its own page,
+        which is how short card links (/c/CODE) render: the path carries the
+        code, the URL fragment (#...) carries the unseal key. Browsers never
+        send fragments to any server. This page makes exactly one request —
+        to Toayen's own backend, sending only the short code — receives the
+        sealed card, and opens it locally in your browser. The server cannot
+        read the card; the key never leaves this page. Nothing else is
+        fetched from anywhere except our own logo, which carries no card
+        data. Any other unknown path shows a plain not-found note below.
+    -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #FAFAF9;
+            color: #1A1A1A;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 24px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        header {
+            margin-bottom: 32px;
+        }
+
+        .logo-small {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #1A1A1A;
+        }
+
+        .logo-icon {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            border-radius: 22%;
+        }
+
+        .logo-text {
+            font-weight: 300;
+            font-size: 17px;
+            letter-spacing: 2px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #EEEEEC;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 28px 24px 20px;
+            text-align: center;
+        }
+
+        .avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: #2C2C2C;
+            border-radius: 50%;
+            color: white;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .card-name {
+            font-weight: 300;
+            font-size: 28px;
+            letter-spacing: 1.5px;
+            line-height: 1.3;
+            overflow-wrap: break-word;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .card-section {
+            border-top: 1px solid #EEEEEC;
+            padding: 18px 24px;
+        }
+
+        .card-section h2 {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .detail-row {
+            font-size: 15px;
+            color: #1A1A1A;
+            margin-bottom: 4px;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-row .detail-label {
+            color: #999;
+            margin-right: 6px;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .chip {
+            font-size: 13px;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(44, 44, 44, 0.07);
+            color: #2C2C2C;
+            overflow-wrap: anywhere;
+        }
+
+        .chip.muted {
+            background: rgba(107, 107, 107, 0.08);
+            color: #6B6B6B;
+        }
+
+        .chip .size-value {
+            font-weight: 600;
+        }
+
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            display: block;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 14px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: opacity 0.2s, border-color 0.2s;
+        }
+
+        .btn-primary {
+            background: #2C2C2C;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-disabled {
+            background: white;
+            border: 1px solid #EEEEEC;
+            color: #C0C0C0;
+            cursor: default;
+        }
+
+        .btn-note {
+            text-align: center;
+            font-size: 13px;
+            color: #999;
+            margin-top: 6px;
+        }
+
+        .empty {
+            background: #FAFAF9;
+            border: 1px solid #EEEEEC;
+            border-radius: 14px;
+            padding: 40px 28px;
+            text-align: center;
+        }
+
+        .empty h1 {
+            font-weight: 300;
+            font-size: 22px;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+            font-size: 14.5px;
+            color: #666;
+        }
+
+        .empty a {
+            color: #666;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        footer {
+            margin-top: auto;
+            padding-top: 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #999;
+        }
+
+        footer a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #111;
+                color: #F0F0F0;
+            }
+
+            .logo-small {
+                color: #F0F0F0;
+            }
+
+            .card {
+                background: #1A1A1A;
+                border-color: #2A2A2A;
+            }
+
+            .avatar {
+                background: #555;
+            }
+
+            .card-subtitle {
+                color: #8E8E8E;
+            }
+
+            .card-section {
+                border-color: #2A2A2A;
+            }
+
+            .card-section h2 {
+                color: #8E8E8E;
+            }
+
+            .detail-row {
+                color: #F0F0F0;
+            }
+
+            .detail-row .detail-label {
+                color: #8E8E8E;
+            }
+
+            .chip {
+                background: rgba(240, 240, 240, 0.08);
+                color: #F0F0F0;
+            }
+
+            .chip.muted {
+                background: rgba(142, 142, 142, 0.12);
+                color: #8E8E8E;
+            }
+
+            .btn-primary {
+                background: #F0F0F0;
+                color: #1A1A1A;
+            }
+
+            .btn-disabled {
+                background: #1A1A1A;
+                border-color: #2A2A2A;
+                color: #444;
+            }
+
+            .btn-note {
+                color: #666;
+            }
+
+            .empty {
+                background: #161616;
+                border-color: #222;
+            }
+
+            .empty p {
+                color: #888;
+            }
+
+            .empty a {
+                color: #888;
+            }
+
+            footer {
+                color: #666;
+            }
+
+            footer a {
+                color: #888;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="logo-small">
+                <img class="logo-icon" src="/assets/logo-256.png" alt="">
+                <span class="logo-text">toayen</span>
+            </a>
+        </header>
+
+        <div id="loading" class="empty">
+            <h1>Opening this card</h1>
+            <p>One moment.</p>
+        </div>
+
+        <div id="card" class="card" hidden>
+            <div class="card-header">
+                <div id="avatar" class="avatar"></div>
+                <h1 id="card-name" class="card-name"></h1>
+                <p id="card-subtitle" class="card-subtitle" hidden></p>
+            </div>
+            <div id="details-section" class="card-section" hidden></div>
+            <div id="likes-section" class="card-section" hidden>
+                <h2>Likes</h2>
+                <div id="likes" class="chips"></div>
+            </div>
+            <div id="dislikes-section" class="card-section" hidden>
+                <h2>Dislikes</h2>
+                <div id="dislikes" class="chips"></div>
+            </div>
+            <div id="sizes-section" class="card-section" hidden>
+                <h2>Sizes</h2>
+                <div id="sizes" class="chips"></div>
+            </div>
+        </div>
+
+        <div id="expired" class="empty" hidden>
+            <h1>This card link has expired</h1>
+            <p>Card links last 90 days. Ask the sender to share a fresh one from Toayen, it only takes two taps.</p>
+        </div>
+
+        <div id="broken" class="empty" hidden>
+            <h1>This card link looks incomplete</h1>
+            <p>Part of the link seems to have been lost along the way. Ask the sender to share their card again from Toayen.</p>
+        </div>
+
+        <div id="notfound" class="empty" hidden>
+            <h1>Page not found</h1>
+            <p>There's nothing at this address. <a href="/">Back to toayen.co.uk</a></p>
+        </div>
+
+        <div id="actions" class="actions" hidden>
+            <a id="open-app" class="btn btn-primary" href="#">Open in Toayen</a>
+            <span class="btn btn-disabled">Get Toayen &middot; Coming soon to the App Store</span>
+            <!-- At App Store launch, replace the disabled span above with:
+                 <a class="btn btn-primary" href="APP_STORE_URL_HERE">Get Toayen on the App Store</a> -->
+            <p class="btn-note">Already have Toayen? "Open in Toayen" adds these details in one tap.</p>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Toayen. Made with care.</p>
+        </footer>
+    </div>
+
+    <script>
+    (function () {
+        'use strict';
+
+        var API_URL = 'https://dnktcnfbkciiaengimhb.supabase.co/functions/v1/shared-cards';
+        var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+
+        function show(id) { document.getElementById(id).hidden = false; }
+        function hide(id) { document.getElementById(id).hidden = true; }
+        function fail(id) { hide('loading'); show(id); }
+
+        // Path: /c/CODE — anything else on this 404 page is a genuine miss.
+        var match = location.pathname.match(/^\/c\/([A-Za-z0-9]{4,12})\/?$/);
+        if (!match) { fail('notfound'); return; }
+        var code = match[1].toUpperCase();
+
+        // The unseal key rides the fragment and never leaves this page.
+        var keyRaw = location.hash ? location.hash.slice(1) : '';
+        try { keyRaw = decodeURIComponent(keyRaw); } catch (e) { /* keep as-is */ }
+        if (!keyRaw || keyRaw.length > 100) { fail('broken'); return; }
+
+        function b64ToBytes(b64url) {
+            var b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+            while (b64.length % 4 !== 0) { b64 += '='; }
+            var bin = atob(b64);
+            var bytes = new Uint8Array(bin.length);
+            for (var i = 0; i < bin.length; i++) { bytes[i] = bin.charCodeAt(i); }
+            return bytes;
+        }
+
+        function bytesToB64url(bytes) {
+            var bin = '';
+            for (var i = 0; i < bytes.length; i++) { bin += String.fromCharCode(bytes[i]); }
+            return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        var keyBytes;
+        try { keyBytes = b64ToBytes(keyRaw); } catch (e) { fail('broken'); return; }
+        if (keyBytes.length !== 16 || !window.crypto || !window.crypto.subtle) {
+            fail('broken');
+            return;
+        }
+
+        fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get', code: code })
+        }).then(function (res) {
+            return res.json().then(function (body) { return { status: res.status, body: body }; });
+        }).then(function (result) {
+            if (result.status !== 200 || !result.body || typeof result.body.ciphertext !== 'string') {
+                fail(result.body && result.body.error === 'expired' ? 'expired' : 'broken');
+                return;
+            }
+            var combined;
+            try { combined = b64ToBytes(result.body.ciphertext); } catch (e) { fail('broken'); return; }
+            if (combined.length < 29 || combined.length > 65536) { fail('broken'); return; }
+
+            // CryptoKit's combined box is nonce (12) + ciphertext + tag (16);
+            // WebCrypto wants the nonce separately and the tag appended.
+            var iv = combined.slice(0, 12);
+            var sealed = combined.slice(12);
+
+            window.crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt'])
+                .then(function (key) {
+                    return window.crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv, tagLength: 128 }, key, sealed);
+                })
+                .then(function (plain) {
+                    var payload = null;
+                    try { payload = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(plain))); } catch (e) {}
+                    if (!payload) { fail('broken'); return; }
+                    render(payload, new Uint8Array(plain));
+                })
+                .catch(function () { fail('broken'); });
+        }).catch(function () { fail('broken'); });
+
+        function detailRow(label, value) {
+            var row = document.createElement('p');
+            row.className = 'detail-row';
+            var lab = document.createElement('span');
+            lab.className = 'detail-label';
+            lab.textContent = label;
+            row.appendChild(lab);
+            row.appendChild(document.createTextNode(value));
+            return row;
+        }
+
+        function fillChips(containerId, sectionId, items, muted) {
+            if (!Array.isArray(items)) { return; }
+            var container = document.getElementById(containerId);
+            var added = 0;
+            for (var i = 0; i < items.length && added < 30; i++) {
+                if (typeof items[i] !== 'string' || !items[i].trim()) { continue; }
+                var chip = document.createElement('span');
+                chip.className = muted ? 'chip muted' : 'chip';
+                chip.textContent = items[i].trim().slice(0, 50);
+                container.appendChild(chip);
+                added++;
+            }
+            if (added > 0) { show(sectionId); }
+        }
+
+        // Everything renders via textContent, never as HTML — the payload is
+        // untrusted input even after it decrypts cleanly.
+        function render(payload, plainBytes) {
+            if (typeof payload.name !== 'string' || !payload.name.trim()) { fail('broken'); return; }
+            var name = payload.name.trim().slice(0, 100);
+
+            document.getElementById('avatar').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('card-name').textContent = name;
+
+            var subtitleParts = [];
+            if (typeof payload.ageRange === 'string' && payload.ageRange) {
+                subtitleParts.push(payload.ageRange.slice(0, 50));
+            }
+            if (typeof payload.gender === 'string' && payload.gender) {
+                subtitleParts.push(payload.gender.slice(0, 50));
+            }
+            if (subtitleParts.length) {
+                var subtitle = document.getElementById('card-subtitle');
+                subtitle.textContent = subtitleParts.join(' · ');
+                subtitle.hidden = false;
+            }
+
+            var details = document.getElementById('details-section');
+            var month = payload.birthdayMonth;
+            var day = payload.birthdayDay;
+            if (typeof month === 'number' && month >= 1 && month <= 12 &&
+                typeof day === 'number' && day >= 1 && day <= 31) {
+                details.appendChild(detailRow('Birthday', Math.floor(day) + ' ' + MONTHS[Math.floor(month) - 1]));
+                details.hidden = false;
+            }
+            if (typeof payload.location === 'string' && payload.location.trim()) {
+                details.appendChild(detailRow('Location', payload.location.trim().slice(0, 100)));
+                details.hidden = false;
+            }
+
+            fillChips('likes', 'likes-section', payload.likes, false);
+            fillChips('dislikes', 'dislikes-section', payload.dislikes, true);
+
+            if (payload.sizes && typeof payload.sizes === 'object' && !Array.isArray(payload.sizes)) {
+                var sizesContainer = document.getElementById('sizes');
+                var keys = Object.keys(payload.sizes).sort().slice(0, 15);
+                var sizesAdded = 0;
+                for (var k = 0; k < keys.length; k++) {
+                    var value = payload.sizes[keys[k]];
+                    if (typeof value !== 'string' || !value.trim()) { continue; }
+                    var sizeChip = document.createElement('span');
+                    sizeChip.className = 'chip muted';
+                    sizeChip.textContent = keys[k].trim().slice(0, 30) + ' ';
+                    var strong = document.createElement('span');
+                    strong.className = 'size-value';
+                    strong.textContent = value.trim().slice(0, 30);
+                    sizeChip.appendChild(strong);
+                    sizesContainer.appendChild(sizeChip);
+                    sizesAdded++;
+                }
+                if (sizesAdded > 0) { show('sizes-section'); }
+            }
+
+            // Hand the opened payload to the app via its custom scheme — the
+            // fallback for when the app is installed but the universal link
+            // opened in the browser anyway. The app accepts base64url.
+            document.getElementById('open-app').href =
+                'toayen://import?data=' + encodeURIComponent(bytesToB64url(plainBytes));
+
+            hide('loading');
+            show('card');
+            show('actions');
+            document.title = name + "'s Toayen Card";
+        }
+    })();
+    </script>
+</body>
+</html>
