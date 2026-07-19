@@ -530,6 +530,14 @@
                 details.appendChild(detailRow('Location', payload.location.trim().slice(0, 100)));
                 details.hidden = false;
             }
+            if (typeof payload.address === 'string' && payload.address.trim()) {
+                details.appendChild(detailRow('Address', payload.address.trim().slice(0, 300)));
+                details.hidden = false;
+            }
+            if (typeof payload.email === 'string' && payload.email.trim()) {
+                details.appendChild(detailRow('Email', payload.email.trim().slice(0, 100)));
+                details.hidden = false;
+            }
 
             fillChips('likes', 'likes-section', payload.likes, false);
             fillChips('dislikes', 'dislikes-section', payload.dislikes, true);
