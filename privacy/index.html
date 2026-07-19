@@ -28,31 +28,31 @@
 
     <div class="policy-hero">
         <h1>privacy policy</h1>
-        <p class="effective">Effective 29 March 2026</p>
-        <p class="intro">Toayen is a gift-planning app for iPhone, iPad, and Apple Watch. Your privacy matters to us. This policy explains what data we collect, how we use it, and your rights.</p>
+        <p class="effective">Effective 19 July 2026</p>
+        <p class="intro">Toayen is a gift-planning app for iPhone and iPad. Your privacy matters to us. This policy explains what data we collect, how we use it, and your rights.</p>
     </div>
 
     <div class="policy-body">
         <div class="policy-section">
             <h2>1. Data stored on your device</h2>
-            <p>The majority of your data never leaves your device. The following is stored locally using Apple's SwiftData framework and is not transmitted to any server:</p>
+            <p>The majority of your data never leaves your device. The following is stored locally using Apple's SwiftData framework and is not transmitted to our servers:</p>
             <ul>
-                <li>People you add (names, birthdays, interests, sizes, notes)</li>
-                <li>Gift ideas, events, and spending history</li>
+                <li>People you add (names, birthdays, interests, sizes, notes, photos)</li>
+                <li>Gift ideas, occasions, and spending history</li>
                 <li>Your preferences (accent colour, region, holidays)</li>
-                <li>Voice note recordings and transcriptions</li>
             </ul>
-            <p>This data is included in your iCloud backup if you have iCloud enabled, under Apple's own privacy terms.</p>
+            <p>If you have iCloud enabled, this data syncs between your devices through your <em>private</em> iCloud database and is included in your iCloud backup — both under Apple's own privacy terms. We cannot read your private iCloud data.</p>
         </div>
 
         <div class="policy-section">
             <h2>2. Account and authentication</h2>
-            <p>If you choose to sign in (optional, required only for personalised suggestion features), we use Sign in with Apple. We receive:</p>
+            <p>If you choose to sign in (optional, required only for personalised suggestions, sharing, and notification features), we use Sign in with Apple. We receive and store:</p>
             <ul>
                 <li>A unique Apple user identifier</li>
                 <li>Your email address (or Apple's private relay address if you choose to hide it)</li>
+                <li>Your name as shared by Sign in with Apple, used as your display name in shared occasions</li>
             </ul>
-            <p>We store this in our database (hosted on Supabase) solely to authenticate your personalised suggestion requests and manage your subscription.</p>
+            <p>We store this in our database (hosted on Supabase) to authenticate your requests, manage your subscription, and identify you to people you choose to share with.</p>
         </div>
 
         <div class="policy-section">
@@ -73,59 +73,75 @@
             <p>We track your personalised suggestion usage to enforce free and premium tier limits. We store:</p>
             <ul>
                 <li>Request counts and remaining credit balances (suggestions and guide refreshes)</li>
+                <li>Promotional credit grants we have applied to your account</li>
                 <li>Token counts and estimated cost (for our internal cost management)</li>
             </ul>
-            <p>This data is linked to your account ID and cannot identify you personally.</p>
+            <p>This data is linked to your account ID.</p>
         </div>
 
         <div class="policy-section">
             <h2>5. Anonymous analytics</h2>
-            <p>We collect anonymous, non-identifiable analytics to understand how the app is used and to power features like trending gifts. This data cannot be traced back to any individual user. We collect:</p>
+            <p>We collect anonymous, non-identifiable analytics to understand how the app is used and to power features like trending gifts. This data is stored without any user identifier and cannot be traced back to an individual account. We collect:</p>
             <ul>
                 <li>Gift events: when a gift idea is saved, purchased, or given — including the gift title, category, price range, retailer, occasion type, and recipient demographics (relationship, age range, location). No names or user IDs are included.</li>
-                <li>Usage snapshots: periodic aggregate counts of how many people, gift ideas, events, and notes exist on the device, along with common interests and relationship types. Sent at most once per day.</li>
+                <li>Usage snapshots: periodic aggregate counts of how many people, gift ideas, occasions, and notes exist on the device, along with common interests and relationship types. Sent at most once per day.</li>
             </ul>
-            <p>This data is stored separately from your account and contains no personally identifiable information. It is used solely to improve the app and surface trending gift data to all users.</p>
+            <p>This data is stored separately from your account and is used solely to improve the app and surface trending gift data to all users.</p>
         </div>
 
         <div class="policy-section">
-            <h2>6. Subscriptions</h2>
+            <h2>6. Shared occasions and cards</h2>
+            <p>Some features let you share gift planning with other people. Only what you actively choose to share leaves your device:</p>
+            <ul>
+                <li><strong>Shared occasions.</strong> If you share an occasion (for example, planning Christmas with family), we store on our servers: the occasion's name and date, the display names of members, the names of the people the plan covers, and the gift list itself (gift titles, descriptions, prices, and statuses). This content is visible to everyone you invite, and is linked to the accounts of the members who create or edit it. Private notes on your own gift ideas are never shared.</li>
+                <li><strong>Person cards.</strong> Sharing a card by QR code passes it directly device-to-device — no server involved. Sharing a card by link seals it with end-to-end encryption on your phone: our server stores only unreadable ciphertext under a short code for up to 90 days, and the decryption key travels in the link itself, which never reaches our server. We cannot read your cards.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>7. Notifications</h2>
+            <p>Occasion and birthday reminders are scheduled on your device. If you enable notifications, we also store your device's push token with your account so we can deliver notifications, including occasional tips and offers from Toayen — this is stated where you enable notifications, and you can switch tips and offers off at any time in Settings (we honour that choice on our servers). Push tokens are removed when you sign out or delete your account.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>8. Subscriptions</h2>
             <p>Subscriptions are processed entirely by Apple through StoreKit 2. We do not collect or store any payment information. We receive subscription status updates (active, expired, renewed) to determine your tier.</p>
         </div>
 
         <div class="policy-section">
-            <h2>7. Analytics and tracking</h2>
-            <p>We do not use any third-party analytics, advertising SDKs, or tracking frameworks. We do not track your behaviour, build advertising profiles, or sell your data to anyone.</p>
+            <h2>9. Analytics and tracking</h2>
+            <p>We do not use any third-party analytics, advertising SDKs, or tracking frameworks. We do not track your behaviour across other companies' apps or websites, build advertising profiles, or sell your data to anyone.</p>
         </div>
 
         <div class="policy-section">
-            <h2>8. Data sharing</h2>
-            <p>We do not sell, rent, or share your personal data with third parties. The only external service that receives any of your data is Anthropic (for personalised suggestion features), as described above.</p>
+            <h2>10. Data sharing</h2>
+            <p>We do not sell, rent, or share your personal data with third parties. The only external services that receive any of your data are Anthropic (for personalised suggestion features, as described above) and Apple (to deliver push notifications and process subscriptions).</p>
         </div>
 
         <div class="policy-section">
-            <h2>9. Data retention and deletion</h2>
-            <p>Your on-device data persists until you delete the app or remove it manually. Your server-side account data (email, usage counts, subscription events) can be permanently deleted at any time by tapping "Delete Account" in the app's Settings. This immediately removes all your data from our servers.</p>
+            <h2>11. Data retention and deletion</h2>
+            <p>Your on-device data persists until you delete the app or remove it manually. Deleting your account in the app's Settings permanently removes all your server-side data: your account record (email, display name), usage counts and credit grants, subscription events, push tokens, shared occasions you own (including their gift lists), and any encrypted card links you created. Shared-card links also expire automatically after 90 days.</p>
         </div>
 
         <div class="policy-section">
-            <h2>10. Children's privacy</h2>
+            <h2>12. Children's privacy</h2>
             <p>Toayen is not directed at children under 13. We do not knowingly collect personal information from children.</p>
         </div>
 
         <div class="policy-section">
-            <h2>11. Your rights</h2>
+            <h2>13. Your rights</h2>
             <p>You can:</p>
             <ul>
-                <li>Use the app without signing in (personalised suggestion features will be unavailable)</li>
+                <li>Use the app without signing in (personalised suggestion, sharing, and push notification features will be unavailable)</li>
                 <li>Use Apple's private email relay to hide your real email</li>
+                <li>Switch off tips and offers at any time in Settings</li>
                 <li>Delete your account and all server-side data at any time from Settings</li>
                 <li>Request a copy of your server-side data by contacting us</li>
             </ul>
         </div>
 
         <div class="policy-section">
-            <h2>12. Changes to this policy</h2>
+            <h2>14. Changes to this policy</h2>
             <p>We may update this policy from time to time. We will notify you of material changes through the app or by updating the effective date above.</p>
         </div>
 
