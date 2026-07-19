@@ -328,6 +328,15 @@
                 color: #888;
             }
         }
+
+        /* Shared-occasion invite code (#339) */
+        .join-code {
+            font-family: "DM Sans", -apple-system, sans-serif;
+            font-size: 34px;
+            font-weight: 600;
+            letter-spacing: 6px;
+            margin: 16px 0;
+        }
     </style>
 </head>
 <body>
@@ -380,6 +389,14 @@
             <p>There's nothing at this address. <a href="/">Back to toayen.co.uk</a></p>
         </div>
 
+        <!-- Shared-occasion invite (#339): /join/CODE -->
+        <div id="join" class="empty" hidden>
+            <h1>You're invited to plan an occasion</h1>
+            <p>Someone wants to plan gifts together with you on Toayen.</p>
+            <p class="join-code" id="join-code"></p>
+            <p>Open Toayen and the invite appears automatically — or go to Occasions and enter the code. Invite codes work for 7 days.</p>
+        </div>
+
         <div id="actions" class="actions" hidden>
             <a id="open-app" class="btn btn-primary" href="#">Open in Toayen</a>
             <span class="btn btn-disabled">Get Toayen &middot; Coming soon to the App Store</span>
@@ -404,6 +421,21 @@
         function show(id) { document.getElementById(id).hidden = false; }
         function hide(id) { document.getElementById(id).hidden = true; }
         function fail(id) { hide('loading'); show(id); }
+
+        // Path: /join/CODE — a shared-occasion invite (#339). Rendered
+        // entirely client-side; the code never goes to any server from here.
+        var joinMatch = location.pathname.match(/^\/join\/([A-Za-z0-9]{4,32})\/?$/);
+        if (joinMatch) {
+            var joinCode = joinMatch[1].toUpperCase();
+            document.title = 'Toayen invite';
+            document.getElementById('join-code').textContent = joinCode;
+            var openApp = document.getElementById('open-app');
+            openApp.href = 'toayen://join?code=' + encodeURIComponent(joinCode);
+            hide('loading');
+            show('join');
+            show('actions');
+            return;
+        }
 
         // Path: /c/CODE — anything else on this 404 page is a genuine miss.
         var match = location.pathname.match(/^\/c\/([A-Za-z0-9]{4,12})\/?$/);
