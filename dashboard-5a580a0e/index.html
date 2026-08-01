@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0F0F0F">
+<meta name="robots" content="noindex, nofollow">
+<title>Toayen · Mission Control</title>
+<link rel="apple-touch-icon" href="https://dnktcnfbkciiaengimhb.supabase.co/functions/v1/dashboard/icon.png">
+<link rel="icon" href="https://dnktcnfbkciiaengimhb.supabase.co/functions/v1/dashboard/icon.png">
+<style>
+  :root {
+    --bg: #0F0F0F; --card: #1A1A1A; --border: #2A2A2A;
+    --text: #F0F0F0; --muted: #8E8E8E; --faint: #444444;
+    --good: #8FB896; --warn: #D4AF8A; --bad: #E09099;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 400 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    padding: calc(env(safe-area-inset-top) + 16px) 20px calc(env(safe-area-inset-bottom) + 40px);
+  }
+  .wrap { max-width: 520px; margin: 0 auto; }
+
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  header img { width: 40px; height: 40px; border-radius: 9px; border: 1px solid var(--border); }
+  header .t { flex: 1; }
+  header h1 { font-size: 19px; font-weight: 300; letter-spacing: 1.5px; }
+  header .sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  #refresh {
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
+    border-radius: 12px; width: 40px; height: 40px; font-size: 17px; cursor: pointer;
+  }
+  #refresh.busy { animation: spin 1s linear infinite; color: var(--text); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+  .tile {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 12px; min-width: 0;
+  }
+  .tile.wide { grid-column: span 3; display: flex; align-items: baseline; gap: 10px; }
+  .tile .v { font-size: 24px; font-weight: 200; letter-spacing: .3px; white-space: nowrap; }
+  .tile .k { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px; margin-bottom: 10px;
+  }
+  .card h2 {
+    font-size: 11px; font-weight: 500; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 12px;
+  }
+  .big { font-size: 30px; font-weight: 200; }
+  .big small { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 6px; letter-spacing: 0; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin-top: 12px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px 12px; margin-top: 12px; }
+  .kv .v { font-size: 17px; font-weight: 300; }
+  .kv .k { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 1px; }
+
+  .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .row .lbl { width: 96px; flex: none; font-size: 12.5px; color: var(--muted); }
+  .row .bar { flex: 1; height: 4px; background: #232323; border-radius: 2px; overflow: hidden; }
+  .row .bar i { display: block; height: 100%; background: var(--faint); border-radius: 2px; }
+  .row .n { width: 34px; flex: none; text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+
+  .split { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin: 10px 0 6px; background: #232323; }
+  .split i { display: block; height: 100%; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip {
+    font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
+    background: #232323; color: var(--muted); letter-spacing: .3px;
+  }
+  .chip.bad { color: var(--bad); background: rgba(224,144,153,.12); }
+  .chip.warn { color: var(--warn); background: rgba(212,175,138,.10); }
+  .chip.good { color: var(--good); background: rgba(143,184,150,.10); }
+
+  .list { margin-top: 10px; }
+  .item { padding: 9px 0; border-top: 1px solid #222; font-size: 13.5px; display: flex; gap: 8px; }
+  .item:first-child { border-top: 0; }
+  .item .no { color: var(--muted); flex: none; font-variant-numeric: tabular-nums; }
+  .item .ti { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item .tag { flex: none; font-size: 10.5px; color: var(--muted); padding-top: 2px; }
+
+  .spark { width: 100%; height: 40px; display: block; margin-top: 10px; }
+  .note { font-size: 11.5px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+  .miss { font-size: 13px; color: var(--muted); }
+  .miss code { color: var(--text); font-size: 12px; }
+  .err { color: var(--bad); font-size: 13px; }
+  .muted { color: var(--muted); }
+  .good { color: var(--good); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+  .stars { color: var(--warn); letter-spacing: 2px; }
+
+  #login { max-width: 320px; margin: 22vh auto 0; text-align: center; }
+  #login img { width: 64px; height: 64px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 18px; }
+  #login h1 { font-size: 20px; font-weight: 300; letter-spacing: 2px; margin-bottom: 24px; }
+  #login input {
+    width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text);
+    border-radius: 10px; padding: 13px 14px; font-size: 16px; margin-bottom: 10px; outline: none;
+  }
+  #login input:focus { border-color: var(--faint); }
+  #login button {
+    width: 100%; background: var(--text); color: var(--bg); border: 0; border-radius: 12px;
+    padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  #login .err { margin-top: 12px; min-height: 18px; }
+  .hidden { display: none; }
+  footer { text-align: center; font-size: 11px; color: var(--faint); margin-top: 24px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<div id="login" class="hidden">
+  <img src="https://dnktcnfbkciiaengimhb.supabase.co/functions/v1/dashboard/icon.png" alt="">
+  <h1>mission control</h1>
+  <input id="key" type="password" placeholder="Dashboard key" autocomplete="current-password">
+  <button id="unlock">Unlock</button>
+  <div class="err" id="loginerr"></div>
+</div>
+
+<div id="app" class="wrap hidden">
+  <header>
+    <img src="https://dnktcnfbkciiaengimhb.supabase.co/functions/v1/dashboard/icon.png" alt="">
+    <div class="t">
+      <h1>toayen</h1>
+      <div class="sub" id="updated">loading…</div>
+    </div>
+    <button id="refresh" title="Refresh">&#8635;</button>
+  </header>
+  <div id="content"></div>
+  <footer>mission control</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  // Absolute: the page is hosted in Supabase Storage (or anywhere), while the
+  // data API lives on the edge function. CORS on the function allows this.
+  var BASE = "https://dnktcnfbkciiaengimhb.supabase.co/functions/v1/dashboard";
+  var LS = "toayen_dashboard_key";
+  var lastLoad = 0;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  };
+  var money = function (v) {
+    if (v == null) return "—";
+    var n = Number(v);
+    var s = n >= 100 ? Math.round(n).toLocaleString() : n.toFixed(2);
+    return "$" + s;
+  };
+  var num = function (v) {
+    if (v == null) return "—";
+    var n = Number(v);
+    if (n >= 100000) return (n / 1000).toFixed(0) + "k";
+    if (n >= 10000) return (n / 1000).toFixed(1) + "k";
+    return n.toLocaleString();
+  };
+  var kv = function (v, k, cls) {
+    return '<div class="kv"><div class="v ' + (cls || "") + '">' + v + '</div><div class="k">' + esc(k) + "</div></div>";
+  };
+  var tile = function (v, k) {
+    return '<div class="tile"><div class="v">' + v + '</div><div class="k">' + esc(k) + "</div></div>";
+  };
+  var bars = function (rows, max) {
+    var m = max || 1;
+    rows.forEach(function (r) { if (r.n > m) m = r.n; });
+    return rows.map(function (r) {
+      return '<div class="row"><div class="lbl">' + esc(r.l) + '</div><div class="bar"><i style="width:' +
+        (r.n ? Math.max(4, Math.round(r.n / m * 100)) : 0) + '%;background:' + (r.c || "var(--faint)") +
+        '"></i></div><div class="n">' + num(r.n) + "</div></div>";
+    }).join("");
+  };
+  var spark = function (series, color) {
+    if (!series || !series.length) return "";
+    var max = 0.0001;
+    series.forEach(function (p) { if (p.v > max) max = p.v; });
+    var W = 300, H = 40, PAD = 2;
+    var pts = series.map(function (p, i) {
+      var x = PAD + i * (W - 2 * PAD) / Math.max(1, series.length - 1);
+      var y = H - PAD - (p.v / max) * (H - 2 * PAD);
+      return x.toFixed(1) + "," + y.toFixed(1);
+    });
+    return '<svg class="spark" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none">' +
+      '<polyline points="' + pts.join(" ") + '" fill="none" stroke="' + color + '" stroke-width="1.5" ' +
+      'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+  };
+  var section = function (title, inner) {
+    return '<div class="card"><h2>' + esc(title) + "</h2>" + inner + "</div>";
+  };
+  var missing = function (what, secret) {
+    return '<div class="miss">' + esc(what) + " — add the <code>" + esc(secret) + "</code> secret (docs/dashboard.md)</div>";
+  };
+  var failed = function (s) {
+    return '<div class="err">Source error: ' + esc(s && s.error || "unknown") + "</div>";
+  };
+  var STATE_LABELS = {
+    READY_FOR_SALE: "Live", PENDING_DEVELOPER_RELEASE: "Pending release",
+    WAITING_FOR_REVIEW: "Waiting for review", IN_REVIEW: "In review",
+    PREPARE_FOR_SUBMISSION: "Preparing", REJECTED: "Rejected",
+    DEVELOPER_REJECTED: "Developer rejected", ACCEPTED: "Accepted",
+    PROCESSING_FOR_APP_STORE: "Processing", PENDING_APPLE_RELEASE: "Pending Apple release",
+  };
+  var stateLabel = function (s) {
+    if (!s) return "—";
+    return STATE_LABELS[s] || String(s).toLowerCase().replace(/_/g, " ");
+  };
+
+  // ---- section renderers --------------------------------------------------
+
+  function heroHtml(d) {
+    var u = d.users, r = d.revenue, ai = d.ai, gi = d.defects;
+    return '<div class="tiles">' +
+      tile(u && u.ok ? num(u.total) : "—", "Users") +
+      tile(u && u.ok ? num(u.premium_active) : "—", "Premium") +
+      tile(gi && gi.ok && gi.connected ? num(gi.open) : "—", "Open issues") +
+      "</div><div class=\"tiles\" style=\"grid-template-columns:1fr 1fr\">" +
+      tile(r && r.ok ? money(r.est_gross_ever) : "—", "Est. gross · ever") +
+      tile(ai && ai.ok ? money(ai.month.cost) : "—", "AI cost · month") +
+      "</div>";
+  }
+
+  function usersHtml(s) {
+    if (!s.ok) return section("Users", failed(s));
+    var inner = '<div class="big">' + num(s.total) + "<small>signed-in users</small></div>";
+    var pf = s.premium_active + s.free;
+    if (pf > 0) {
+      inner += '<div class="split">' +
+        '<i style="width:' + (s.premium_active / pf * 100) + '%;background:var(--good)"></i>' +
+        '<i style="width:' + (s.free / pf * 100) + '%;background:#333"></i></div>' +
+        '<div class="note" style="margin-top:0">' + num(s.premium_active) + " premium · " + num(s.free) + " free" +
+        (s.premium_lapsed ? " · " + num(s.premium_lapsed) + " lapsed" : "") + "</div>";
+    }
+    inner += '<div class="grid3">' +
+      kv("+" + num(s.new_7d), "new · 7d") + kv("+" + num(s.new_30d), "new · 30d") +
+      kv(num(s.devices), "push devices") + "</div>";
+    if (s.by_country && s.by_country.length) {
+      inner += '<div class="list">' + bars(s.by_country.map(function (c) {
+        return { l: c.code, n: c.count };
+      })) + "</div>";
+    }
+    inner += '<div class="note">' + num(s.marketing_opt_in) + " of " + num(s.devices) +
+      " devices opted into tips &amp; offers. Sign-in is optional, so anonymous users appear only under Activity.</div>";
+    return section("Users", inner);
+  }
+
+  function revenueHtml(s) {
+    if (!s.ok) return section("Revenue", failed(s));
+    var inner = '<div class="big">' + money(s.est_mrr) + "<small>est. MRR</small></div>" +
+      '<div class="grid3">' +
+      kv(money(s.est_gross_month), "this month") +
+      kv(money(s.est_gross_year), "this year") +
+      kv(money(s.est_gross_ever), "all time") + "</div>" +
+      '<div class="grid2">' +
+      kv(num(s.active_monthly), "monthly subs") + kv(num(s.active_annual), "annual subs") + "</div>";
+    var ev = s.events_30d || {};
+    inner += '<div class="chips">' +
+      '<span class="chip good">+' + num(ev.subscribed || 0) + " subscribed</span>" +
+      '<span class="chip">' + num(ev.renewed || 0) + " renewed</span>" +
+      '<span class="chip warn">' + num(ev.expired || 0) + " expired</span>" +
+      '<span class="chip bad">' + num(ev.revoked || 0) + " revoked</span></div>" +
+      '<div class="note">Last 30 days. ' + esc(s.note || "") + "</div>";
+    return section("Revenue", inner);
+  }
+
+  function aiHtml(s) {
+    if (!s.ok) return section("AI usage & cost", failed(s));
+    var m = s.month, l = s.last30;
+    var inner = '<div class="big">' + money(m.cost) + "<small>this month (est.)</small></div>";
+    if (s.actuals && s.actuals.connected) {
+      inner += '<div class="note" style="margin-top:2px">Billed by Anthropic, last 30 days: <b>' +
+        money(s.actuals.cost_30d) + "</b></div>";
+    }
+    inner += spark(l.cost_by_day, "var(--warn)");
+    var errCls = l.errors > 0 ? "bad" : "";
+    inner += '<div class="grid3" style="margin-top:6px">' +
+      kv(num(l.requests), "requests · 30d") +
+      kv(num(l.errors), "errors", errCls) +
+      kv(l.avg_ms != null ? num(l.avg_ms) + "ms" : "—", "avg latency") + "</div>" +
+      '<div class="grid3">' +
+      kv(num(m.suggestions), "suggestions") + kv(num(m.guides), "guide refreshes") +
+      kv(money(s.ever_cost), "cost · ever") + "</div>";
+    if (l.by_model && l.by_model.length) {
+      inner += '<div class="list">' + l.by_model.map(function (mm) {
+        return '<div class="item"><div class="ti">' + esc(mm.model) + '</div><div class="tag">' +
+          num(mm.requests) + " req · " + money(mm.cost) + "</div></div>";
+      }).join("") + "</div>";
+    }
+    if (m.top_user_suggestions > 0) {
+      inner += '<div class="note">Heaviest user this month: ' + num(m.top_user_suggestions) +
+        " / 50 suggestions.</div>";
+    }
+    if (!(s.actuals && s.actuals.connected)) {
+      inner += '<div class="note">Costs are in-house estimates from request_log. For billed actuals add ' +
+        "<code>ANTHROPIC_ADMIN_KEY</code>.</div>";
+    }
+    return section("AI usage & cost", inner);
+  }
+
+  function defectsHtml(s) {
+    if (!s.ok) return section("Defects & work", failed(s));
+    if (!s.connected) return section("Defects & work", missing("GitHub not connected", "GITHUB_TOKEN"));
+    var st = s.by_stage || {};
+    var inner = '<div class="big">' + num(s.open) + "<small>open issues</small></div>" +
+      '<div class="list">' + bars([
+        { l: "ready", n: st.ready || 0, c: "var(--warn)" },
+        { l: "planned", n: st.planned || 0 },
+        { l: "approved", n: st.approved || 0, c: "var(--good)" },
+        { l: "review", n: st.review || 0 },
+        { l: "changes-needed", n: st["changes-needed"] || 0, c: "var(--bad)" },
+        { l: "unlabelled", n: s.unstaged || 0 },
+      ]) + "</div>";
+    var sev = s.by_severity || {};
+    inner += '<div class="chips">' +
+      '<span class="chip' + (sev.critical ? " bad" : "") + '">' + num(sev.critical || 0) + " critical</span>" +
+      '<span class="chip' + (sev.high ? " warn" : "") + '">' + num(sev.high || 0) + " high</span>" +
+      '<span class="chip">' + num(sev.medium || 0) + " medium</span>" +
+      '<span class="chip">' + num(sev.low || 0) + " low</span></div>" +
+      '<div class="grid3">' +
+      kv("+" + num(s.created_7d), "new · 7d") + kv(num(s.closed_7d), "closed · 7d") +
+      kv(s.oldest_open_days != null ? num(s.oldest_open_days) + "d" : "—", "oldest open") + "</div>";
+    inner += '<div class="note">' + num(s.bugs) + " bugs · " + num(s.enhancements) +
+      " enhancements · " + num(s.testflight) + " from TestFlight feedback</div>";
+    if (s.recent && s.recent.length) {
+      inner += '<div class="list">' + s.recent.map(function (i) {
+        return '<div class="item"><div class="no">#' + i.number + '</div><div class="ti">' + esc(i.title) +
+          '</div><div class="tag">' + esc(i.stage || i.severity || "") + "</div></div>";
+      }).join("") + "</div>";
+    }
+    return section("Defects & work", inner);
+  }
+
+  function appStoreHtml(s) {
+    if (!s.ok) return section("App Store", failed(s));
+    var inner = "";
+    var v = (s.versions || [])[0];
+    if (v) {
+      var live = v.state === "READY_FOR_SALE";
+      inner += '<div class="big">' + esc(v.version || "") + '<small class="' +
+        (live ? "good" : "warn") + '">' + esc(stateLabel(v.state)) + "</small></div>";
+    } else if (!s.connected) {
+      inner += missing("App Store status not connected", "ASC_PRIVATE_KEY");
+    }
+    if (s.storefronts && s.storefronts.length) {
+      inner += '<div class="grid2">' + s.storefronts.map(function (f) {
+        var r = f.rating != null ? Number(f.rating).toFixed(1) : "—";
+        return kv(r + " ★", f.country + " · " + num(f.ratings_count) + " ratings");
+      }).join("") + "</div>";
+    } else {
+      inner += '<div class="note">Not on the storefront yet — ratings appear once the app is released.</div>';
+    }
+    if (s.reviews && s.reviews.length) {
+      inner += '<div class="list">' + s.reviews.slice(0, 5).map(function (r) {
+        var stars = "";
+        for (var i = 0; i < (r.rating || 0); i++) stars += "★";
+        return '<div class="item" style="display:block"><span class="stars">' + stars +
+          '</span> <b style="font-size:13px">' + esc(r.title || "") + "</b>" +
+          '<div class="muted" style="font-size:12.5px;margin-top:2px">' + esc(r.body || "") +
+          '</div><div class="tag" style="margin-top:3px">' + esc(r.nickname || "") + " · " +
+          esc(r.territory || "") + "</div></div>";
+      }).join("") + "</div>";
+    } else if (s.connected) {
+      inner += '<div class="note">No customer reviews yet. TestFlight feedback auto-files into Defects (label: testflight).</div>';
+    }
+    return section("App Store", inner);
+  }
+
+  function activityHtml(s) {
+    if (!s.ok) return section("Activity", failed(s));
+    var inner = '<div class="big">' + num(s.events_14d) + "<small>events · 14 days</small></div>" +
+      spark(s.per_day_14d, "var(--good)");
+    var t = s.by_type || {};
+    inner += '<div class="grid3" style="margin-top:6px">' +
+      kv(num(t.gift_added), "gifts added") +
+      kv(num(t.gift_purchased), "bought") +
+      kv(num(t.gift_given), "given") + "</div>" +
+      '<div class="grid3">' +
+      kv(num(t.suggestion_saved), "AI saves") +
+      kv(num(t.link_saved), "links saved") +
+      kv(num(s.total_events), "events · ever") + "</div>";
+    if (s.top_countries_14d && s.top_countries_14d.length) {
+      inner += '<div class="list">' + bars(s.top_countries_14d.map(function (c) {
+        return { l: c.code, n: c.count };
+      })) + "</div>";
+    }
+    inner += '<div class="note">Anonymous gift events from all devices (signed-in or not).</div>';
+    return section("Activity", inner);
+  }
+
+  // ---- shell --------------------------------------------------------------
+
+  function render(d) {
+    $("content").innerHTML =
+      heroHtml(d) +
+      usersHtml(d.users || {}) +
+      revenueHtml(d.revenue || {}) +
+      aiHtml(d.ai || {}) +
+      defectsHtml(d.defects || {}) +
+      appStoreHtml(d.appstore || {}) +
+      activityHtml(d.activity || {});
+    var t = new Date(d.generated_at);
+    $("updated").textContent = "updated " + t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function showLogin(msg) {
+    $("app").classList.add("hidden");
+    $("login").classList.remove("hidden");
+    $("loginerr").textContent = msg || "";
+    $("key").focus();
+  }
+
+  function load(fresh) {
+    var key = localStorage.getItem(LS);
+    if (!key) { showLogin(); return; }
+    $("login").classList.add("hidden");
+    $("app").classList.remove("hidden");
+    $("refresh").classList.add("busy");
+    fetch(BASE + "/data" + (fresh ? "?fresh=1" : ""), { headers: { "x-dashboard-key": key } })
+      .then(function (r) {
+        if (r.status === 401) { localStorage.removeItem(LS); showLogin("Wrong key — try again."); throw new Error("unauthorized"); }
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (d) { lastLoad = Date.now(); render(d); })
+      .catch(function (e) {
+        if (String(e.message) !== "unauthorized") {
+          $("updated").textContent = "load failed — " + e.message;
+        }
+      })
+      .finally(function () { $("refresh").classList.remove("busy"); });
+  }
+
+  $("unlock").addEventListener("click", function () {
+    var k = $("key").value.trim();
+    if (!k) return;
+    localStorage.setItem(LS, k);
+    $("key").value = "";
+    load(true);
+  });
+  $("key").addEventListener("keydown", function (e) { if (e.key === "Enter") $("unlock").click(); });
+  $("refresh").addEventListener("click", function () { load(true); });
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && Date.now() - lastLoad > 180000) load(false);
+  });
+
+  load(false);
+})();
+</script>
+</body>
+</html>
