@@ -275,8 +275,11 @@
     var m = s.month, l = s.last30;
     var inner = '<div class="big">' + money(m.cost) + "<small>this month (est.)</small></div>";
     if (s.actuals && s.actuals.connected) {
+      var cr = s.actuals.credits;
       inner += '<div class="note" style="margin-top:2px">Billed by Anthropic, last 30 days: <b>' +
-        money(s.actuals.cost_30d) + "</b></div>";
+        money(s.actuals.cost_30d) + "</b>" +
+        (cr ? " &nbsp;·&nbsp; Credits remaining ≈ <b>" + money(cr.remaining) + "</b>" : "") +
+        "</div>";
     }
     inner += spark(l.cost_by_day, "var(--warn)");
     var errCls = l.errors > 0 ? "bad" : "";
