@@ -229,6 +229,23 @@
     margin: 0 0 6px;
 }
 
+/* Marks a feature that needs a subscription. Quiet, but it has to be visible
+ * in the same glance as the feature name — a reader scanning this grid is
+ * forming a view of what the free app does. */
+.lp-premium {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    vertical-align: middle;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--lp-border);
+    color: var(--lp-muted);
+}
+
 .lp-feature p {
     margin: 0;
     font-size: 15px;
