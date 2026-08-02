@@ -195,6 +195,16 @@
             cursor: default;
         }
 
+        .btn-secondary {
+            background: white;
+            border: 1px solid #EEEEEC;
+            color: #1A1A1A;
+        }
+
+        .btn-secondary:hover {
+            border-color: #C0C0C0;
+        }
+
         .btn-note {
             text-align: center;
             font-size: 13px;
@@ -303,6 +313,12 @@
                 color: #444;
             }
 
+            .btn-secondary {
+                background: #1A1A1A;
+                border-color: #2A2A2A;
+                color: #F0F0F0;
+            }
+
             .btn-note {
                 color: #666;
             }
@@ -401,8 +417,19 @@
             <a id="open-app" class="btn btn-primary" href="#">Open in Toayen</a>
             <span class="btn btn-disabled">Get Toayen &middot; Coming soon to the App Store</span>
             <!-- At App Store launch, replace the disabled span above with:
-                 <a class="btn btn-primary" href="APP_STORE_URL_HERE">Get Toayen on the App Store</a> -->
+                 <a class="btn btn-primary" href="https://apps.apple.com/app/id6788513717">Get Toayen on the App Store</a> -->
             <p class="btn-note">Already have Toayen? "Open in Toayen" adds these details in one tap.</p>
+        </div>
+
+        <!-- Invite actions (#339 round 2): newcomers first. The old layout led
+             with "Open in Toayen", which for anyone WITHOUT the app -- the
+             page's whole audience -- died with "address is invalid". Flip
+             APP_STORE_LIVE in the script below the moment the listing is up. -->
+        <div id="join-actions" class="actions" hidden>
+            <a id="join-store" class="btn btn-primary" href="https://apps.apple.com/app/id6788513717" hidden>Get Toayen on the App Store</a>
+            <span id="join-store-soon" class="btn btn-disabled" hidden>Toayen lands on the App Store today &middot; check back shortly</span>
+            <a id="join-open-app" class="btn btn-secondary" href="#">Open in Toayen</a>
+            <p class="btn-note">Already have Toayen? The invite opens straight in the app &mdash; or go to Occasions and type the code above.</p>
         </div>
 
         <footer>
@@ -424,16 +451,20 @@
 
         // Path: /join/CODE — a shared-occasion invite (#339). Rendered
         // entirely client-side; the code never goes to any server from here.
+        // Flip this to true the moment the App Store listing is live — it
+        // swaps the placeholder for the real store button (#339 round 2).
+        var APP_STORE_LIVE = false;
         var joinMatch = location.pathname.match(/^\/join\/([A-Za-z0-9]{4,32})\/?$/);
         if (joinMatch) {
             var joinCode = joinMatch[1].toUpperCase();
             document.title = 'Toayen invite';
             document.getElementById('join-code').textContent = joinCode;
-            var openApp = document.getElementById('open-app');
-            openApp.href = 'toayen://join?code=' + encodeURIComponent(joinCode);
+            document.getElementById('join-open-app').href =
+                'toayen://join?code=' + encodeURIComponent(joinCode);
+            show(APP_STORE_LIVE ? 'join-store' : 'join-store-soon');
             hide('loading');
             show('join');
-            show('actions');
+            show('join-actions');
             return;
         }
 
