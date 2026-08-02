@@ -1,31 +1,161 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toayen - The Only App You Ever Need</title>
+    <title>Toayen — the gift app that remembers everything</title>
+    <meta name="description" content="Toayen remembers birthdays, gift ideas and what you already bought, so you don't have to. Plan every occasion in one place. For iPhone and iPad.">
+    <link rel="canonical" href="https://toayen.co.uk/">
+
+    <!-- Link previews (WhatsApp, Messages, Slack, social) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Toayen">
+    <meta property="og:title" content="Toayen — the gift app that remembers everything">
+    <meta property="og:description" content="Birthdays, gift ideas, and what you already bought — all in one place, so you don't have to hold it in your head.">
+    <meta property="og:url" content="https://toayen.co.uk/">
+    <meta property="og:image" content="https://toayen.co.uk/assets/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="landing.css">
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Toayen",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "iOS 17.0 or later",
+      "url": "https://toayen.co.uk/",
+      "downloadUrl": "https://apps.apple.com/app/id6788513717",
+      "description": "Toayen remembers birthdays, gift ideas and what you already bought, so you don't have to. Plan every occasion in one place.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "GBP",
+        "description": "Free to download, with an optional Premium subscription."
+      }
+    }
+    </script>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <img class="logo" src="assets/logo-256.png" alt="Toayen">
-            <h1 class="wordmark">toayen</h1>
-            <p class="tagline">The gift-giving app that remembers everything so you don't have to.</p>
+<body class="lp">
+
+    <div class="lp-wrap">
+
+        <div class="lp-top">
+            <!-- The bolder ringless mark, not logo-256: at 32px the app icon's
+                 hairline rings and thin T disappear (same reason the favicons
+                 and social avatar drop them). -->
+            <a class="lp-brand" href="/">
+                <img src="assets/logo-mark-200.png" alt="" width="32" height="32">
+                <span>toayen</span>
+            </a>
+            <nav>
+                <a href="#features">Features</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+        </div>
+
+        <header class="lp-hero">
+            <h1>The gift app that remembers everything so you don't have to.</h1>
+            <p>Birthdays, the thing they mentioned in passing, their size, what you bought them last year. Toayen keeps it all in one place so nothing lands late or twice.</p>
+            <a class="lp-cta" href="https://apps.apple.com/app/id6788513717">Download on the App Store</a>
+            <span class="lp-cta-note">Free to download. iPhone and iPad, iOS 17 or later.</span>
         </header>
-        <nav>
-            <a href="privacy">Privacy Policy</a>
-            <a href="terms">Terms of Use</a>
-        </nav>
-        <footer>
-            <p>&copy; 2026 Toayen. Made with care.</p>
+
+        <div class="lp-shots">
+            <figure class="lp-shot">
+                <img src="assets/shots/home.jpg" width="720" height="1565" alt="The Toayen home screen, showing what is coming up and how much has been spent this year." loading="lazy">
+                <figcaption>See what's coming, at a glance.</figcaption>
+            </figure>
+            <figure class="lp-shot">
+                <img src="assets/shots/gift-ideas.jpg" width="720" height="1565" alt="A list of saved gift ideas, each showing who it is for, its price and whether it has been bought." loading="lazy">
+                <figcaption>Keep every idea in one list.</figcaption>
+            </figure>
+            <figure class="lp-shot">
+                <img src="assets/shots/occasions.jpg" width="720" height="1565" alt="Upcoming occasions including birthdays, an anniversary dinner and Christmas, each counting down." loading="lazy">
+                <figcaption>Never miss the date.</figcaption>
+            </figure>
+        </div>
+
+        <section class="lp-section" id="features">
+            <h2>What it does</h2>
+            <div class="lp-features">
+                <div class="lp-feature">
+                    <h3>Remembers the people, not just the dates</h3>
+                    <p>Interests, sizes, what to avoid, and the offhand comment in March that turns into the right present in November.</p>
+                </div>
+                <div class="lp-feature">
+                    <h3>Every occasion in one place</h3>
+                    <p>Birthdays, Christmas, anniversaries and the ones that matter only to you — each counting down, each with its own list.</p>
+                </div>
+                <div class="lp-feature">
+                    <h3>Save ideas the moment you see them</h3>
+                    <p>Share a link from any shop straight into Toayen, and it keeps the price and where you found it.</p>
+                </div>
+                <div class="lp-feature">
+                    <h3>Know what you actually spent</h3>
+                    <p>Every gift you mark as bought is recorded, so by December you know exactly where the money went.</p>
+                </div>
+                <div class="lp-feature">
+                    <h3>Share what you like</h3>
+                    <p>Send your own card — sizes and interests — so the people buying for you have something to go on.</p>
+                </div>
+                <div class="lp-feature">
+                    <h3>Plan together</h3>
+                    <p>Invite family to a shared occasion so nobody buys the same thing twice.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-section" id="faq">
+            <h2>Questions</h2>
+            <div class="lp-faq">
+                <details>
+                    <summary>How much does it cost?</summary>
+                    <p>Toayen is free to download and free to use for planning, tracking and sharing. Premium adds more personalised suggestions, full spending insights and occasion budgets, at £2.99 a month or £17.99 a year.</p>
+                </details>
+                <details>
+                    <summary>Do I need an account?</summary>
+                    <p>No. Toayen works without signing in. Signing in with Apple is optional, and only needed for personalised suggestions and to sync across your devices.</p>
+                </details>
+                <details>
+                    <summary>Where is my data kept?</summary>
+                    <p>On your device, and in your own private iCloud if you turn on sync. The people you add, your notes and your photos are yours. See the <a href="/privacy">privacy policy</a> for the detail.</p>
+                </details>
+                <details>
+                    <summary>Does it read my contacts?</summary>
+                    <p>Only if you choose to import someone, and only the person you pick. Nothing is uploaded — contact details you import stay on your device.</p>
+                </details>
+                <details>
+                    <summary>Is there an Android version?</summary>
+                    <p>Not yet. Toayen is currently iPhone and iPad only.</p>
+                </details>
+                <details>
+                    <summary>How do I get in touch?</summary>
+                    <p>Email <a href="mailto:info@toayen.co.uk">info@toayen.co.uk</a>.</p>
+                </details>
+            </div>
+        </section>
+
+        <footer class="lp-foot">
+            <span>&copy; 2026 Toayen. Made with care.</span>
+            <nav>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+                <a href="mailto:info@toayen.co.uk">Contact</a>
+            </nav>
         </footer>
+
     </div>
+
 </body>
 </html>

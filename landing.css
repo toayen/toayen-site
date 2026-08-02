@@ -1,0 +1,291 @@
+/* Landing page (app #371).
+ *
+ * Deliberately a separate stylesheet with its own `lp-` prefix. style.css owns
+ * generic selectors — .container, header, nav, footer — that /privacy, /terms,
+ * /c/ and /card all depend on, so the landing page keeps out of that namespace
+ * entirely rather than risk collateral damage on pages nobody would think to
+ * re-check.
+ *
+ * Tokens mirror the app's own (CLAUDE.md): #FAFAF9 ground, #FFFFFF cards,
+ * #EEEEEC hairline borders, #1A1A1A / #6B6B6B text, Obsidian accent. Type is
+ * Outfit 300 for headings, DM Sans for body, matching the app exactly.
+ */
+
+:root {
+    --lp-bg: #FAFAF9;
+    --lp-card: #FFFFFF;
+    --lp-border: #EEEEEC;
+    --lp-divider: #E8E8E6;
+    --lp-text: #1A1A1A;
+    --lp-muted: #6B6B6B;
+    --lp-accent: #2C2C2C;
+    --lp-accent-soft: rgba(44, 44, 44, .06);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --lp-bg: #0F0F0F;
+        --lp-card: #1A1A1A;
+        --lp-border: #2A2A2A;
+        --lp-divider: #2A2A2A;
+        --lp-text: #F0F0F0;
+        --lp-muted: #8E8E8E;
+        --lp-accent: #F0F0F0;
+        --lp-accent-soft: rgba(240, 240, 240, .07);
+    }
+}
+
+.lp {
+    background: var(--lp-bg);
+    color: var(--lp-text);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.65;
+    min-height: 100vh;
+}
+
+.lp-wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.lp h1, .lp h2, .lp h3 {
+    font-family: 'Outfit', -apple-system, sans-serif;
+    font-weight: 300;
+    text-wrap: balance;
+}
+
+/* ── Top bar ── */
+
+.lp-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 0;
+}
+
+.lp-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--lp-text);
+}
+
+.lp-brand img {
+    width: 32px;
+    height: 32px;
+    border-radius: 22%;
+}
+
+.lp-brand span {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    font-size: 17px;
+    letter-spacing: 3px;
+}
+
+.lp-top nav {
+    display: flex;
+    gap: 20px;
+}
+
+.lp-top nav a {
+    color: var(--lp-muted);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.lp-top nav a:hover { color: var(--lp-text); }
+
+/* ── Hero ── */
+
+/* Sized so the headline, the sub-line and the download button all clear the
+ * fold on a 375x812 phone. At 42px the headline alone ran five lines and
+ * pushed the button off-screen entirely. */
+.lp-hero {
+    padding: 28px 0 20px;
+    text-align: center;
+}
+
+.lp-hero h1 {
+    font-size: 32px;
+    line-height: 1.2;
+    letter-spacing: .4px;
+    margin: 0 0 16px;
+}
+
+.lp-hero p {
+    font-size: 16px;
+    color: var(--lp-muted);
+    max-width: 30em;
+    margin: 0 auto 24px;
+}
+
+.lp-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--lp-accent);
+    color: var(--lp-bg);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 14px 26px;
+    border-radius: 12px;
+    transition: opacity .2s ease;
+}
+
+.lp-cta:hover { opacity: .85; }
+.lp-cta:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 3px; }
+
+.lp-cta-note {
+    display: block;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--lp-muted);
+}
+
+/* ── Screenshots ── */
+
+.lp-shots {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    justify-items: center;
+    padding: 40px 0 8px;
+}
+
+.lp-shot {
+    max-width: 260px;
+    text-align: center;
+}
+
+.lp-shot img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--lp-border);
+    border-radius: 18px;
+}
+
+.lp-shot figcaption {
+    font-size: 14px;
+    color: var(--lp-muted);
+    margin-top: 14px;
+}
+
+/* ── Feature rows ── */
+
+.lp-section {
+    padding: 56px 0;
+    border-top: 1px solid var(--lp-divider);
+    margin-top: 56px;
+}
+
+.lp-section > h2 {
+    font-size: 27px;
+    letter-spacing: .8px;
+    margin: 0 0 32px;
+    text-align: center;
+}
+
+.lp-features {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.lp-feature {
+    background: var(--lp-card);
+    border: 1px solid var(--lp-border);
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.lp-feature h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0 0 6px;
+}
+
+.lp-feature p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--lp-muted);
+}
+
+/* ── FAQ ── */
+
+.lp-faq { display: flex; flex-direction: column; gap: 0; }
+
+.lp-faq details {
+    border-bottom: 1px solid var(--lp-divider);
+    padding: 16px 0;
+}
+
+.lp-faq details:first-of-type { border-top: 1px solid var(--lp-divider); }
+
+.lp-faq summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.lp-faq summary::-webkit-details-marker { display: none; }
+
+.lp-faq summary::after {
+    content: "+";
+    color: var(--lp-muted);
+    font-weight: 400;
+    flex-shrink: 0;
+}
+
+.lp-faq details[open] summary::after { content: "\2212"; }
+
+.lp-faq summary:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 3px; border-radius: 4px; }
+
+.lp-faq p {
+    margin: 10px 0 0;
+    font-size: 15px;
+    color: var(--lp-muted);
+    max-width: 60ch;
+}
+
+/* ── Footer ── */
+
+.lp-foot {
+    border-top: 1px solid var(--lp-divider);
+    margin-top: 56px;
+    padding: 28px 0 48px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--lp-muted);
+}
+
+.lp-foot nav { display: flex; gap: 20px; flex-wrap: wrap; }
+.lp-foot a { color: var(--lp-muted); text-decoration: none; }
+.lp-foot a:hover { color: var(--lp-text); text-decoration: underline; }
+
+/* ── Wider screens ── */
+
+@media (min-width: 700px) {
+    .lp-hero { padding: 64px 0 32px; }
+    .lp-hero h1 { font-size: 50px; }
+    .lp-hero p { font-size: 18px; }
+    .lp-shots { grid-template-columns: repeat(3, 1fr); align-items: start; }
+    .lp-features { grid-template-columns: 1fr 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lp * { transition: none !important; }
+}
