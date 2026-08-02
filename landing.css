@@ -122,22 +122,41 @@
     margin: 0 auto 24px;
 }
 
-.lp-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--lp-accent);
-    color: var(--lp-bg);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 15px;
-    padding: 14px 26px;
-    border-radius: 12px;
+/* Apple's badge is supplied artwork and must not be restyled, recoloured or
+ * distorted. So: no background, no border, no padding on the image itself —
+ * only a height, with width auto to preserve its aspect. The margin is the
+ * clear space Apple's guidelines require around the badge. */
+.lp-badge {
+    display: inline-block;
+    margin: 4px;
+    line-height: 0;
+    border-radius: 8px;
     transition: opacity .2s ease;
 }
 
-.lp-cta:hover { opacity: .85; }
-.lp-cta:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 3px; }
+.lp-badge img {
+    height: 54px;
+    width: auto;
+    display: block;
+}
+
+/* Both variants ship, and CSS picks one. A <picture> with a media source is
+ * only evaluated at load, so someone switching their system appearance with
+ * the page open keeps the wrong badge until they reload — and Apple's
+ * guidelines are specifically about the badge contrasting with its
+ * background. Two 10KB SVGs is a cheap price for always being right.
+ *
+ * Selectors are qualified with img to outrank `.lp-badge img` above — a bare
+ * `.lp-badge-dark` loses on specificity and both badges render stacked. */
+.lp-badge img.lp-badge-dark { display: none; }
+
+@media (prefers-color-scheme: dark) {
+    .lp-badge img.lp-badge-light { display: none; }
+    .lp-badge img.lp-badge-dark { display: block; }
+}
+
+.lp-badge:hover { opacity: .85; }
+.lp-badge:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 4px; }
 
 .lp-cta-note {
     display: block;

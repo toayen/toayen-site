@@ -67,7 +67,14 @@
         <header class="lp-hero">
             <h1>The gift app that remembers everything so you don't have to.</h1>
             <p>Birthdays, the thing they mentioned in passing, their size, what you bought them last year. Toayen keeps it all in one place so nothing lands late or twice.</p>
-            <a class="lp-cta" href="https://apps.apple.com/app/id6788513717">Download on the App Store</a>
+            <!-- Apple's official badge, unmodified, from their Marketing
+                 Resources. Guidelines require it to contrast with its
+                 background, so the white variant is served in dark mode.
+                 Height is set and width left auto so it can never distort. -->
+            <a class="lp-badge" href="https://apps.apple.com/app/id6788513717">
+                <img class="lp-badge-light" src="assets/appstore-badge-black.svg" alt="Download Toayen on the App Store">
+                <img class="lp-badge-dark" src="assets/appstore-badge-white.svg" alt="" aria-hidden="true">
+            </a>
             <span class="lp-cta-note">Free to download. iPhone and iPad, iOS 17 or later.</span>
         </header>
 
