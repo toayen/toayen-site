@@ -1,0 +1,164 @@
+/* Article pages (app #379).
+ *
+ * Loaded AFTER landing.css, which supplies the colour tokens and the shared
+ * top bar and footer — so every page carries the same header without a second
+ * copy of it. This file only adds what an article needs.
+ *
+ * Prefix is pg- so it cannot collide with landing.css's lp- or with the
+ * generic selectors style.css owns for /privacy and /terms.
+ */
+
+.pg-article {
+    max-width: 34em;          /* ~68 characters — comfortable for long reading */
+    margin: 0 auto;
+    padding: 8px 0 0;
+}
+
+.pg-eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--lp-muted);
+    margin-bottom: 14px;
+    display: block;
+    text-decoration: none;
+}
+
+a.pg-eyebrow:hover { color: var(--lp-text); }
+
+.pg-article h1 {
+    font-family: 'Outfit', -apple-system, sans-serif;
+    font-weight: 300;
+    font-size: 34px;
+    line-height: 1.2;
+    letter-spacing: .4px;
+    margin: 0 0 18px;
+    text-wrap: balance;
+}
+
+.pg-standfirst {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--lp-muted);
+    margin: 0 0 32px;
+}
+
+.pg-article h2 {
+    font-family: 'Outfit', -apple-system, sans-serif;
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: .3px;
+    line-height: 1.3;
+    margin: 40px 0 12px;
+    text-wrap: balance;
+}
+
+.pg-article h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    margin: 28px 0 8px;
+}
+
+.pg-article p {
+    margin: 0 0 16px;
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+.pg-article ul, .pg-article ol {
+    margin: 0 0 16px;
+    padding-left: 22px;
+}
+
+.pg-article li {
+    font-size: 17px;
+    line-height: 1.7;
+    margin-bottom: 8px;
+}
+
+.pg-article li::marker { color: var(--lp-muted); }
+
+.pg-article a { color: var(--lp-text); text-underline-offset: 3px; }
+.pg-article a:hover { color: var(--lp-muted); }
+
+.pg-article strong { font-weight: 600; }
+
+/* A pulled-out practical point — not a decorative blockquote. */
+.pg-note {
+    border-left: 2px solid var(--lp-accent);
+    padding: 2px 0 2px 18px;
+    margin: 24px 0;
+    color: var(--lp-muted);
+    font-size: 16px;
+    line-height: 1.65;
+}
+
+/* The soft close. Honest and small: the article has to stand on its own, and
+ * someone who found it useful should feel invited, not harvested. */
+.pg-cta {
+    background: var(--lp-card);
+    border: 1px solid var(--lp-border);
+    border-radius: 14px;
+    padding: 20px;
+    margin: 40px 0 8px;
+}
+
+.pg-cta p { font-size: 16px; margin: 0 0 14px; color: var(--lp-muted); }
+.pg-cta p strong { color: var(--lp-text); }
+
+.pg-cta-link {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    color: var(--lp-bg);
+    background: var(--lp-accent);
+    padding: 11px 20px;
+    border-radius: 12px;
+}
+
+.pg-cta-link:hover { opacity: .85; }
+.pg-cta-link:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 3px; }
+
+/* Related reading */
+.pg-more {
+    border-top: 1px solid var(--lp-divider);
+    margin-top: 40px;
+    padding-top: 24px;
+}
+
+.pg-more h2 { font-size: 18px; margin: 0 0 14px; }
+
+.pg-more ul { list-style: none; padding: 0; margin: 0; }
+.pg-more li { margin-bottom: 10px; font-size: 16px; }
+
+/* Index listing */
+.pg-index { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+
+.pg-index a {
+    display: block;
+    background: var(--lp-card);
+    border: 1px solid var(--lp-border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    text-decoration: none;
+}
+
+.pg-index a:hover { border-color: var(--lp-muted); }
+
+.pg-index h2 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    margin: 0 0 4px;
+    color: var(--lp-text);
+}
+
+.pg-index p { margin: 0; font-size: 15px; color: var(--lp-muted); line-height: 1.55; }
+
+@media (min-width: 700px) {
+    .pg-article h1 { font-size: 42px; }
+    .pg-article { padding-top: 24px; }
+}
