@@ -451,9 +451,9 @@
 
         // Path: /join/CODE — a shared-occasion invite (#339). Rendered
         // entirely client-side; the code never goes to any server from here.
-        // Flip this to true the moment the App Store listing is live — it
-        // swaps the placeholder for the real store button (#339 round 2).
-        var APP_STORE_LIVE = false;
+        // Flipped 2026-08-02: Toayen 1.0 is READY_FOR_SALE — invite pages
+        // lead with the real App Store button (#339 round 2).
+        var APP_STORE_LIVE = true;
         var joinMatch = location.pathname.match(/^\/join\/([A-Za-z0-9]{4,32})\/?$/);
         if (joinMatch) {
             var joinCode = joinMatch[1].toUpperCase();
