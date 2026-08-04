@@ -180,6 +180,18 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
 .pg-more ul { list-style: none; padding: 0; margin: 0; }
 .pg-more li { margin-bottom: 10px; font-size: 16px; }
 
+/* The hub's own call to action. Apple's badge rather than the words "App
+ * Store" in a sentence, which was the one place on the site where the store
+ * was text instead of the supplied artwork.
+ *
+ * The badge keeps the 4px left margin it carries everywhere else, so it lines
+ * up with the badges on the landing page and at the foot of each article
+ * rather than sitting flush with the prose. Nothing here touches the image. */
+.pg-hub-cta {
+    margin: 4px 0 6px;
+    line-height: 0;
+}
+
 /* Index listing. Hairline-separated rows, same idiom as the landing page's
  * feature rows, rather than a stack of bordered cards.
  *
