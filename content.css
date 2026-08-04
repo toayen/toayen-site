@@ -197,6 +197,44 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
     text-decoration: none;
 }
 
+/* A device thumbnail per row, showing the screen the article is about. Hidden
+ * on phones, where the row is already full width and a small phone picture
+ * inside a phone adds nothing. */
+.pg-index-shot { display: none; }
+
+@media (min-width: 720px) {
+    .pg-index-row {
+        grid-template-columns: minmax(0, 1fr) 132px;
+        column-gap: 44px;
+        align-items: center;
+        padding: 30px 0;
+    }
+
+    .pg-index-text { grid-column: 1; }
+
+    .pg-index-shot {
+        display: block;
+        grid-column: 2;
+        grid-row: 1;
+        width: 132px;
+        height: auto;
+        align-self: center;
+        filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .20));
+        transition: transform .45s cubic-bezier(.2, .7, .3, 1);
+    }
+
+    .pg-index-row:hover .pg-index-shot { transform: translateY(-4px); }
+}
+
+@media (prefers-color-scheme: dark) {
+    .pg-index-shot { filter: drop-shadow(0 14px 26px rgba(0, 0, 0, .5)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pg-index-shot { transition: none; }
+    .pg-index-row:hover .pg-index-shot { transform: none; }
+}
+
 .pg-index h2 {
     font-family: 'Outfit', sans-serif;
     font-weight: 400;
@@ -219,13 +257,20 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
 
 .pg-index a:hover h2::after { width: 46px; }
 
-.pg-index p { margin: 0; font-size: 15px; color: var(--lp-body); max-width: 56ch; }
+.pg-index p { margin: 10px 0 0; font-size: 15px; color: var(--lp-body); max-width: 56ch; }
 
 @media (min-width: 720px) {
     .pg-article {
         max-width: 46em;
         padding-top: 24px;
     }
+
+    /* The hub is an index, not an article: no aside to fill the right, so it
+     * spans the wrap and each row carries its own thumbnail instead. Its
+     * intro paragraphs keep a reading measure of their own. */
+    .pg-article:not(:has(.pg-more)) { max-width: none; }
+    .pg-article:not(:has(.pg-more)) > p,
+    .pg-article:not(:has(.pg-more)) > .pg-standfirst { max-width: 46em; }
     .pg-article h1 { font-size: 42px; max-width: 18ch; }
     .pg-standfirst { font-size: 19px; }
     .pg-article h2 { margin-top: 48px; }
@@ -240,14 +285,16 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
  * by restructuring the markup, so the reading order in the HTML, and for a
  * screen reader, is unchanged: article first, related links after. */
 @media (min-width: 980px) {
-    .pg-article {
+    /* :has, so the hub, which has no aside, does not inherit a two-column grid
+     * with nothing in the second column. That was the empty right half. */
+    .pg-article:has(.pg-more) {
         max-width: none;
         display: grid;
         grid-template-columns: minmax(0, 44em) minmax(190px, 1fr);
         column-gap: 60px;
     }
 
-    .pg-article > * { grid-column: 1; }
+    .pg-article:has(.pg-more) > * { grid-column: 1; }
 
     .pg-more {
         grid-column: 2;
