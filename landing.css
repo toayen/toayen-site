@@ -351,7 +351,11 @@ html, .lp { overflow-x: hidden; }
     max-width: 40ch;
 }
 
-.lp-band-shot { max-width: 232px; position: relative; }
+/* justify-self, not just max-width: a constrained item in a single-column grid
+ * aligns to the start of its column, so on a phone the device pinned to the
+ * left edge while the stacked screenshots above it were centred. At 720px up
+ * the column is sized to the item, so centring there is a no-op. */
+.lp-band-shot { max-width: 232px; position: relative; justify-self: center; }
 
 /* The soft Rose glow the app itself uses behind a suggestion, breathing slowly.
  * It is the only continuous motion on the page, 8 seconds a cycle, and it sits
