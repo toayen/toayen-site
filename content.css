@@ -8,13 +8,18 @@
  * generic selectors style.css owns for /privacy and /terms.
  *
  * Aligned to the landing page redesign: hairlines rather than boxes, the Rose
- * accent used to mark rather than decorate, --lp-body for long prose so a full
- * article does not read flat, and left-aligned rather than centred, matching
- * the asymmetric layout the rest of the site now uses.
+ * accent used to mark rather than decorate, and --lp-body for long prose so a
+ * full article does not read flat.
+ *
+ * The column is centred, unlike the landing page. That asymmetry works there
+ * because device artwork fills the right-hand side; an article has nothing to
+ * put there, so hanging 34em of prose against the left edge just leaves half
+ * the screen empty.
  */
 
 .pg-article {
     max-width: 34em;          /* ~68 characters, comfortable for long reading */
+    margin: 0 auto;
     padding: 8px 0 0;
 }
 
@@ -107,11 +112,40 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
  * match the section headings and the band. */
 .pg-note {
     border-left: 2px solid var(--lp-tint);
-    padding: 2px 0 2px 18px;
-    margin: 26px 0;
+    padding: 4px 0 4px 22px;
+    margin: 34px 0;
+    color: var(--lp-text);
+    font-family: 'Outfit', -apple-system, sans-serif;
+    font-weight: 300;
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+/* A screenshot part-way down, breaking the column and showing the thing the
+ * section is describing. One per article, chosen to match its section rather
+ * than decorate. Pulled slightly wider than the text so it registers as a
+ * change of pace. */
+.pg-figure {
+    margin: 40px 0;
+    text-align: center;
+}
+
+.pg-figure img {
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    display: inline-block;
+    filter: drop-shadow(0 26px 34px rgba(0, 0, 0, .22));
+}
+
+@media (prefers-color-scheme: dark) {
+    .pg-figure img { filter: drop-shadow(0 26px 40px rgba(0, 0, 0, .55)); }
+}
+
+.pg-figure figcaption {
+    font-size: 14px;
     color: var(--lp-muted);
-    font-size: 16px;
-    line-height: 1.65;
+    margin-top: 16px;
 }
 
 /* The soft close. Hairline rules rather than a card, matching the landing
