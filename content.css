@@ -1,16 +1,20 @@
 /* Article pages (app #379).
  *
  * Loaded AFTER landing.css, which supplies the colour tokens and the shared
- * top bar and footer — so every page carries the same header without a second
- * copy of it. This file only adds what an article needs.
+ * top bar and footer, so every page carries the same furniture without a
+ * second copy of it. This file only adds what an article needs.
  *
  * Prefix is pg- so it cannot collide with landing.css's lp- or with the
  * generic selectors style.css owns for /privacy and /terms.
+ *
+ * Aligned to the landing page redesign: hairlines rather than boxes, the Rose
+ * accent used to mark rather than decorate, --lp-body for long prose so a full
+ * article does not read flat, and left-aligned rather than centred, matching
+ * the asymmetric layout the rest of the site now uses.
  */
 
 .pg-article {
-    max-width: 34em;          /* ~68 characters — comfortable for long reading */
-    margin: 0 auto;
+    max-width: 34em;          /* ~68 characters, comfortable for long reading */
     padding: 8px 0 0;
 }
 
@@ -19,7 +23,7 @@
     text-transform: uppercase;
     letter-spacing: 1.4px;
     color: var(--lp-muted);
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     display: block;
     text-decoration: none;
 }
@@ -30,33 +34,46 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
     font-family: 'Outfit', -apple-system, sans-serif;
     font-weight: 300;
     font-size: 34px;
-    line-height: 1.2;
-    letter-spacing: .4px;
+    line-height: 1.16;
+    letter-spacing: -.2px;
     margin: 0 0 18px;
-    text-wrap: balance;
+    text-wrap: pretty;
 }
 
 .pg-standfirst {
     font-size: 18px;
     line-height: 1.6;
     color: var(--lp-muted);
-    margin: 0 0 32px;
+    margin: 0 0 30px;
 }
 
+/* Section headings carry the same short Rose rule as the feature rows on the
+ * landing page, so an article reads as part of the same site. Static here: the
+ * rule marks the section, it does not need to perform. */
 .pg-article h2 {
     font-family: 'Outfit', -apple-system, sans-serif;
     font-weight: 400;
     font-size: 22px;
-    letter-spacing: .3px;
+    letter-spacing: 0;
     line-height: 1.3;
     margin: 40px 0 12px;
     text-wrap: balance;
 }
 
+.pg-article h2::after {
+    content: "";
+    display: block;
+    width: 26px;
+    height: 2px;
+    margin-top: 10px;
+    border-radius: 2px;
+    background: var(--lp-tint);
+}
+
 .pg-article h3 {
-    font-family: 'Hanken Grotesk', sans-serif;
-    font-weight: 600;
-    font-size: 16px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
+    font-size: 17px;
     margin: 28px 0 8px;
 }
 
@@ -64,95 +81,117 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
     margin: 0 0 16px;
     font-size: 17px;
     line-height: 1.7;
+    color: var(--lp-body);
 }
 
 .pg-article ul, .pg-article ol {
     margin: 0 0 16px;
-    padding-left: 22px;
+    padding-left: 20px;
 }
 
 .pg-article li {
     font-size: 17px;
     line-height: 1.7;
     margin-bottom: 8px;
+    color: var(--lp-body);
 }
 
-.pg-article li::marker { color: var(--lp-muted); }
+.pg-article li::marker { color: var(--lp-tint); }
 
 .pg-article a { color: var(--lp-text); text-underline-offset: 3px; }
 .pg-article a:hover { color: var(--lp-muted); }
 
-.pg-article strong { font-weight: 600; }
+.pg-article strong { color: var(--lp-text); font-weight: 600; }
 
-/* A pulled-out practical point — not a decorative blockquote. */
+/* A pulled-out practical point, not a decorative blockquote. Rose rule, to
+ * match the section headings and the band. */
 .pg-note {
-    border-left: 2px solid var(--lp-accent);
+    border-left: 2px solid var(--lp-tint);
     padding: 2px 0 2px 18px;
-    margin: 24px 0;
+    margin: 26px 0;
     color: var(--lp-muted);
     font-size: 16px;
     line-height: 1.65;
 }
 
-/* The soft close. Honest and small: the article has to stand on its own, and
- * someone who found it useful should feel invited, not harvested.
+/* The soft close. Hairline rules rather than a card, matching the landing
+ * page: the article has to stand on its own, and someone who found it useful
+ * should feel invited rather than harvested.
  *
  * The call to action reuses .lp-badge from landing.css rather than styling its
- * own button. Two reasons. Apple's guidelines require their supplied artwork
- * for a badge, and a hand-styled one was invisible in both themes: the colour
- * rule sat on .pg-cta-link (one class) while .pg-article a (class plus
- * element) outranked it, so the text inherited the body colour and landed on
- * an identical background. */
+ * own button. Apple's guidelines require their supplied artwork for a badge,
+ * and a hand-styled one was previously invisible in both themes: the colour
+ * rule sat on one class while .pg-article a (class plus element) outranked it,
+ * so the text inherited the body colour onto an identical background. */
 .pg-cta {
-    background: var(--lp-card);
-    border: 1px solid var(--lp-border);
-    border-radius: 14px;
-    padding: 20px;
-    margin: 40px 0 8px;
+    border-top: 1px solid var(--lp-divider);
+    border-bottom: 1px solid var(--lp-divider);
+    padding: 24px 0;
+    margin: 44px 0 8px;
 }
 
-.pg-cta p { font-size: 16px; margin: 0 0 14px; color: var(--lp-muted); }
+.pg-cta p { font-size: 16px; margin: 0 0 16px; color: var(--lp-body); }
 .pg-cta p strong { color: var(--lp-text); }
-
-
 
 /* Related reading */
 .pg-more {
     border-top: 1px solid var(--lp-divider);
-    margin-top: 40px;
-    padding-top: 24px;
+    margin-top: 44px;
+    padding-top: 26px;
 }
 
 .pg-more h2 { font-size: 18px; margin: 0 0 14px; }
+.pg-more h2::after { display: none; }
 
 .pg-more ul { list-style: none; padding: 0; margin: 0; }
 .pg-more li { margin-bottom: 10px; font-size: 16px; }
 
-/* Index listing */
-.pg-index { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+/* Index listing. Hairline-separated rows, same idiom as the landing page's
+ * feature rows, rather than a stack of bordered cards. */
+.pg-index {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-top: 1px solid var(--lp-divider);
+    margin-top: 30px;
+}
 
 .pg-index a {
-    display: block;
-    background: var(--lp-card);
-    border: 1px solid var(--lp-border);
-    border-radius: 14px;
-    padding: 18px 20px;
+    display: grid;
+    gap: 6px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--lp-divider);
     text-decoration: none;
 }
 
-.pg-index a:hover { border-color: var(--lp-muted); }
-
 .pg-index h2 {
-    font-family: 'Hanken Grotesk', sans-serif;
-    font-weight: 600;
-    font-size: 16px;
-    margin: 0 0 4px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 1.3;
+    margin: 0;
     color: var(--lp-text);
 }
 
-.pg-index p { margin: 0; font-size: 15px; color: var(--lp-muted); line-height: 1.55; }
+.pg-index h2::after {
+    content: "";
+    display: block;
+    width: 26px;
+    height: 2px;
+    margin-top: 9px;
+    border-radius: 2px;
+    background: var(--lp-tint);
+    transition: width .55s cubic-bezier(.2, .7, .3, 1);
+}
 
-@media (min-width: 700px) {
+.pg-index a:hover h2::after { width: 46px; }
+
+.pg-index p { margin: 0; font-size: 15px; color: var(--lp-body); max-width: 56ch; }
+
+@media (min-width: 720px) {
     .pg-article h1 { font-size: 42px; }
     .pg-article { padding-top: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pg-index h2::after { transition: none; }
 }

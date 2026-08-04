@@ -264,11 +264,15 @@ html, .lp { overflow-x: hidden; }
 
 .lp-shots { padding: 44px 0 0; }
 
+/* Centred on a phone. The rest of the page is deliberately left-aligned, but a
+ * single column of device artwork reads as though it has slipped off the edge
+ * when it hangs left with nothing to balance it. The overlap layout at 720px up
+ * positions absolutely, so alignment here only affects the stacked case. */
 .lp-stack {
     display: flex;
     flex-direction: column;
-    gap: 34px;
-    align-items: flex-start;
+    gap: 30px;
+    align-items: center;
 }
 
 .lp-shots figure { margin: 0; max-width: 228px; }
@@ -288,7 +292,7 @@ html, .lp { overflow-x: hidden; }
     font-size: 14px;
     color: var(--lp-muted);
     margin-top: 14px;
-    padding-left: 2px;
+    text-align: center;
 }
 
 /* Captions sit under each device on mobile, where the phones are stacked one
