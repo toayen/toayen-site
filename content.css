@@ -181,7 +181,13 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
 .pg-more li { margin-bottom: 10px; font-size: 16px; }
 
 /* Index listing. Hairline-separated rows, same idiom as the landing page's
- * feature rows, rather than a stack of bordered cards. */
+ * feature rows, rather than a stack of bordered cards.
+ *
+ * Layout lives on .pg-index-row, never on `.pg-index a`. A class-plus-element
+ * selector outranks a bare class, so an element selector here silently beats
+ * the row rule. That has now caused three separate bugs in this stylesheet:
+ * an invisible call-to-action, stacked App Store badges, and a row that
+ * refused to go horizontal. Keep element selectors out of layout. */
 .pg-index {
     display: grid;
     grid-template-columns: 1fr;
@@ -190,11 +196,13 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
 }
 
 .pg-index a {
-    display: grid;
-    gap: 6px;
-    padding: 22px 0;
     border-bottom: 1px solid var(--lp-divider);
     text-decoration: none;
+}
+
+.pg-index-row {
+    display: block;
+    padding: 22px 0;
 }
 
 /* A device thumbnail per row, showing the screen the article is about. Hidden
@@ -202,23 +210,25 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
  * inside a phone adds nothing. */
 .pg-index-shot { display: none; }
 
+/* Text left, a small device thumbnail right. Flex rather than grid: the grid
+ * version needed a row span to sit the tall image beside two text elements,
+ * and a span that stretched its rows apart. Flex just puts two boxes in a row.
+ */
 @media (min-width: 720px) {
     .pg-index-row {
-        grid-template-columns: minmax(0, 1fr) 132px;
-        column-gap: 44px;
+        display: flex;
         align-items: center;
+        gap: 44px;
         padding: 30px 0;
     }
 
-    .pg-index-text { grid-column: 1; }
+    .pg-index-text { flex: 1 1 auto; min-width: 0; }
 
     .pg-index-shot {
         display: block;
-        grid-column: 2;
-        grid-row: 1;
-        width: 132px;
+        flex: 0 0 auto;
+        width: 124px;
         height: auto;
-        align-self: center;
         filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .20));
         transition: transform .45s cubic-bezier(.2, .7, .3, 1);
     }
