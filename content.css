@@ -11,15 +11,19 @@
  * accent used to mark rather than decorate, and --lp-body for long prose so a
  * full article does not read flat.
  *
- * The column is centred, unlike the landing page. That asymmetry works there
- * because device artwork fills the right-hand side; an article has nothing to
- * put there, so hanging 34em of prose against the left edge just leaves half
- * the screen empty.
+ * Column width is a compromise. The header and footer span the full 1060px
+ * wrap, and a centred narrow column inside that frame reads as though nothing
+ * lines up. But prose at 1060px runs to roughly 130 characters a line, about
+ * double what is comfortable, and the eye loses its place coming back to the
+ * left edge.
+ *
+ * So: left edge flush with the header and footer, and a measure widened to
+ * 46em, around 90 characters. Wider than ideal for reading, narrow enough to
+ * still be readable, and now visibly part of the same grid as everything else.
  */
 
 .pg-article {
-    max-width: 34em;          /* ~68 characters, comfortable for long reading */
-    margin: 0 auto;
+    max-width: 34em;
     padding: 8px 0 0;
 }
 
@@ -223,7 +227,15 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
 
 @media (min-width: 720px) {
     .pg-article h1 { font-size: 42px; }
-    .pg-article { padding-top: 24px; }
+    .pg-article {
+        max-width: 46em;
+        padding-top: 24px;
+    }
+    /* Headings and the standfirst hold a tighter measure than the body, so the
+     * top of the article still has a shape rather than running edge to edge. */
+    .pg-article h1 { max-width: 18ch; }
+    .pg-standfirst { max-width: 40em; font-size: 19px; }
+    .pg-article h2 { margin-top: 48px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
