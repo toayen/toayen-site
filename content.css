@@ -277,13 +277,18 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
 
     /* The hub is an index, not an article: no aside to fill the right, so it
      * spans the wrap and each row carries its own thumbnail instead. Its
-     * intro paragraphs keep a reading measure of their own. */
+     * intro runs the full width too, so the top of the page lines up with the
+     * rows below it rather than stopping two thirds of the way across. */
     .pg-article:not(:has(.pg-more)) { max-width: none; }
-    .pg-article:not(:has(.pg-more)) > p,
-    .pg-article:not(:has(.pg-more)) > .pg-standfirst { max-width: 46em; }
     .pg-article h1 { font-size: 42px; max-width: 18ch; }
     .pg-standfirst { font-size: 19px; }
-    .pg-article h2 { margin-top: 48px; }
+
+    /* Direct child only. `.pg-article h2` also matches the headings inside
+     * .pg-index rows and .pg-more, both of which zero their own margin earlier
+     * in this file, so a bare descendant selector here silently reinstated a
+     * 48px top margin on them. In the index rows that pushed the text down
+     * inside a row that is otherwise vertically centred. */
+    .pg-article > h2 { margin-top: 48px; }
 }
 
 /* Two columns once there is room for them. This is the resolution of the
@@ -304,7 +309,12 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
         column-gap: 60px;
     }
 
-    .pg-article:has(.pg-more) > * { grid-column: 1; }
+    /* :not(.pg-more), because `.pg-article:has(.pg-more) > *` scores two
+     * classes and the bare `.pg-more` rule below scores one, so without the
+     * exclusion this rule wins on specificity regardless of source order and
+     * drops the aside into column 1, row 1: on top of the article, above the
+     * headline, with the right column left empty. */
+    .pg-article:has(.pg-more) > *:not(.pg-more) { grid-column: 1; }
 
     .pg-more {
         grid-column: 2;
