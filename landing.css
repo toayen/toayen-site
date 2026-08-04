@@ -8,7 +8,11 @@
  *
  * Tokens mirror the app's own (CLAUDE.md): #FAFAF9 ground, #FFFFFF cards,
  * #EEEEEC hairline borders, #1A1A1A / #6B6B6B text, Obsidian accent. Type is
- * Outfit 300 for headings, DM Sans for body, matching the app exactly.
+ * Outfit 300 for headings, Hanken Grotesk for body, matching the app exactly.
+ *
+ * Layout is left-aligned and asymmetric rather than centred: one measure for
+ * headings, a narrower one for prose, hairlines instead of boxes. Nothing
+ * animates beyond a hover opacity.
  */
 
 :root {
@@ -20,6 +24,11 @@
     --lp-muted: #6B6B6B;
     --lp-accent: #2C2C2C;
     --lp-accent-soft: rgba(44, 44, 44, .06);
+    /* Rose, from the app's own accent palette (CLAUDE.md). Used only as a small
+     * rule under each feature title, never on text. */
+    --lp-tint: #D4707A;
+    /* One step up from muted for longer body copy: still quiet, less flat. */
+    --lp-body: color-mix(in oklab, var(--lp-text) 74%, var(--lp-bg));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,21 +41,32 @@
         --lp-muted: #8E8E8E;
         --lp-accent: #F0F0F0;
         --lp-accent-soft: rgba(240, 240, 240, .07);
+        --lp-tint: #E09099;
+        --lp-body: color-mix(in oklab, var(--lp-text) 74%, var(--lp-bg));
     }
 }
+
+* { box-sizing: border-box; }
 
 .lp {
     background: var(--lp-bg);
     color: var(--lp-text);
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
     line-height: 1.65;
+    margin: 0;
     min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
 }
 
+/* Belt and braces against a sideways scroll: html is the scrolling box, so
+ * clipping on body alone would not hold. */
+html, .lp { overflow-x: hidden; }
+
 .lp-wrap {
-    max-width: 940px;
+    max-width: 1060px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 22px;
 }
 
 .lp h1, .lp h2, .lp h3 {
@@ -55,13 +75,17 @@
     text-wrap: balance;
 }
 
+.lp a { color: var(--lp-text); }
+.lp a:hover { color: var(--lp-text); }
+
 /* ── Top bar ── */
 
 .lp-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 24px 0;
+    gap: 16px;
+    padding: 22px 0;
 }
 
 .lp-brand {
@@ -73,21 +97,21 @@
 }
 
 .lp-brand img {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     border-radius: 22%;
 }
 
 .lp-brand span {
     font-family: 'Outfit', sans-serif;
     font-weight: 300;
-    font-size: 17px;
+    font-size: 16px;
     letter-spacing: 3px;
 }
 
 .lp-top nav {
     display: flex;
-    gap: 20px;
+    gap: 18px;
 }
 
 .lp-top nav a {
@@ -100,42 +124,103 @@
 
 /* ── Hero ── */
 
-/* Sized so the headline, the sub-line and the download button all clear the
- * fold on a 375x812 phone. At 42px the headline alone ran five lines and
- * pushed the button off-screen entirely. */
+/* Sized so the headline, the sub-line and the download badge all clear the
+ * fold on a 375x812 phone. Anything larger than 34px here runs the headline to
+ * five lines and pushes the badge off-screen. */
 .lp-hero {
-    padding: 28px 0 20px;
-    text-align: center;
+    display: grid;
+    gap: 20px;
+    padding: 26px 0 8px;
 }
 
 .lp-hero h1 {
-    font-size: 32px;
-    line-height: 1.2;
-    letter-spacing: .4px;
-    margin: 0 0 16px;
+    font-size: 34px;
+    line-height: 1.16;
+    letter-spacing: -.2px;
+    margin: 0;
+    max-width: 17ch;
+    text-wrap: pretty;
 }
+
+/* The second clause of the headline sits back a shade, so the promise reads
+ * first and the aside reads second. Same sentence, same claim. */
+.lp-hero h1 .lp-soft { color: var(--lp-muted); display: block; }
 
 .lp-hero p {
     font-size: 16px;
     color: var(--lp-muted);
-    max-width: 30em;
-    margin: 0 auto 24px;
+    max-width: 42ch;
+    margin: 0;
+}
+
+/* The four things it holds, as a list that arrives one line at a time on load,
+ * then the sentence that ties them together. Same words as the sentence they
+ * came from. */
+.lp-sub { margin: 0; }
+
+.lp-list {
+    list-style: none;
+    margin: 0 0 14px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.lp-list li {
+    position: relative;
+    padding-left: 17px;
+    font-size: 16px;
+    color: var(--lp-body);
+}
+
+.lp-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: .66em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--lp-tint);
+}
+
+@keyframes lp-slide-in {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: none; }
+}
+
+.lp-list li, .lp-sub p {
+    animation: lp-slide-in .5s cubic-bezier(.2, .7, .3, 1) backwards;
+}
+
+.lp-list li:nth-child(1) { animation-delay: .12s; }
+.lp-list li:nth-child(2) { animation-delay: .22s; }
+.lp-list li:nth-child(3) { animation-delay: .32s; }
+.lp-list li:nth-child(4) { animation-delay: .42s; }
+.lp-sub p { animation-delay: .56s; }
+
+.lp-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 2px;
 }
 
 /* Apple's badge is supplied artwork and must not be restyled, recoloured or
  * distorted. So: no background, no border, no padding on the image itself —
- * only a height, with width auto to preserve its aspect. The margin is the
- * clear space Apple's guidelines require around the badge. */
+ * only a height, with width auto to preserve its aspect. */
 .lp-badge {
     display: inline-block;
-    margin: 4px;
+    margin: 4px 4px 0;
     line-height: 0;
     border-radius: 8px;
     transition: opacity .2s ease;
 }
 
 .lp-badge img {
-    height: 54px;
+    height: 50px;
     width: auto;
     display: block;
 }
@@ -160,113 +245,319 @@
 
 .lp-cta-note {
     display: block;
-    margin-top: 12px;
     font-size: 13px;
     color: var(--lp-muted);
+    margin-left: 4px;
 }
 
-/* ── Screenshots ── */
+/* ── Screenshots ──
+ *
+ * Real device artwork: the app screenshots composited into Apple's own iPhone
+ * bezel, exported as transparent PNGs (assets/framed/). Nothing here restyles
+ * or tilts the hardware, it is placed flat and to scale. The only CSS applied
+ * to the artwork is a soft drop-shadow, which follows the PNG alpha so the
+ * shadow takes the shape of the phone rather than a box.
+ *
+ * Native artwork is 450x920, so the display width is capped near half that to
+ * stay sharp on a 2x screen. Re-export the bezel larger and the cap can go up.
+ */
 
-.lp-shots {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 32px;
-    justify-items: center;
-    padding: 40px 0 8px;
+.lp-shots { padding: 44px 0 0; }
+
+.lp-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 34px;
+    align-items: flex-start;
 }
 
-.lp-shot {
-    max-width: 260px;
-    text-align: center;
-}
+.lp-shots figure { margin: 0; max-width: 228px; }
 
-.lp-shot img {
+.lp-shots img {
+    display: block;
     width: 100%;
     height: auto;
-    display: block;
-    border: 1px solid var(--lp-border);
-    border-radius: 18px;
+    filter: drop-shadow(0 26px 34px rgba(0, 0, 0, .22));
 }
 
-.lp-shot figcaption {
+@media (prefers-color-scheme: dark) {
+    .lp-shots img { filter: drop-shadow(0 26px 40px rgba(0, 0, 0, .55)); }
+}
+
+.lp-shots figcaption {
     font-size: 14px;
     color: var(--lp-muted);
     margin-top: 14px;
+    padding-left: 2px;
+}
+
+/* Captions sit under each device on mobile, where the phones are stacked one
+ * per row. Once they overlap on wider screens the artwork carries itself and
+ * the alt text carries the meaning. */
+.lp-shots-cap { display: none; }
+
+/* ── Suggestions band ──
+ *
+ * Full bleed, faint Rose ground. The accent is doing work here rather than
+ * decorating: this is the one section that is not white or bare, so it reads as
+ * the distinctive claim on the page.
+ */
+
+.lp-band {
+    margin-top: 64px;
+    padding: 52px 0;
+    /* The glow behind the device overhangs the band's own edges, so the band
+     * clips it. Without this the html element scrolls sideways: overflow-x on
+     * body alone does not clip when html is the scrolling box. */
+    overflow: hidden;
+    background: color-mix(in oklab, var(--lp-tint) 8%, var(--lp-bg));
+    border-top: 1px solid color-mix(in oklab, var(--lp-tint) 22%, var(--lp-bg));
+    border-bottom: 1px solid color-mix(in oklab, var(--lp-tint) 22%, var(--lp-bg));
+}
+
+.lp-band-in {
+    display: grid;
+    gap: 32px;
+    align-items: center;
+}
+
+.lp-band-copy h2 {
+    font-size: 27px;
+    line-height: 1.18;
+    letter-spacing: .2px;
+    margin: 0 0 12px;
+    max-width: 20ch;
+}
+
+.lp-band-copy h2::after {
+    content: "";
+    display: block;
+    width: 34px;
+    height: 2px;
+    margin-top: 14px;
+    border-radius: 2px;
+    background: var(--lp-tint);
+    transition: width .7s cubic-bezier(.2, .7, .3, 1) .25s;
+}
+
+.lp-band-copy p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--lp-body);
+    max-width: 40ch;
+}
+
+.lp-band-shot { max-width: 232px; position: relative; }
+
+/* The soft Rose glow the app itself uses behind a suggestion, breathing slowly.
+ * It is the only continuous motion on the page, 8 seconds a cycle, and it sits
+ * behind the device rather than on it. */
+.lp-band-shot::before {
+    content: "";
+    position: absolute;
+    inset: -16% -26%;
+    z-index: 0;
+    border-radius: 50%;
+    background: radial-gradient(closest-side,
+        color-mix(in oklab, var(--lp-tint) 42%, transparent),
+        transparent 72%);
+    animation: lp-breathe 8s ease-in-out infinite alternate;
+}
+
+@keyframes lp-breathe {
+    from { opacity: .45; transform: scale(.94); }
+    to { opacity: .95; transform: scale(1.06); }
+}
+
+/* Dark mode needs a touch more tint to register at all, and a stronger glow
+ * against a near black ground. */
+@media (prefers-color-scheme: dark) {
+    .lp-band {
+        background: color-mix(in oklab, var(--lp-tint) 14%, var(--lp-bg));
+        border-top-color: color-mix(in oklab, var(--lp-tint) 28%, var(--lp-bg));
+        border-bottom-color: color-mix(in oklab, var(--lp-tint) 28%, var(--lp-bg));
+    }
+    .lp-band-shot::before { background: radial-gradient(closest-side, color-mix(in oklab, var(--lp-tint) 55%, transparent), transparent 72%); }
+}
+
+.lp-band-shot img {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 26px 34px rgba(0, 0, 0, .2));
+}
+
+/* Reveal, applied only once the script adds .lp-band-anim. */
+.lp-band-anim .lp-band-copy h2,
+.lp-band-anim .lp-band-copy p,
+.lp-band-anim .lp-band-shot {
+    opacity: 0;
+    transform: translateY(16px);
+}
+
+.lp-band-anim .lp-band-copy h2::after { width: 0; }
+
+.lp-band-anim.is-in .lp-band-copy h2,
+.lp-band-anim.is-in .lp-band-copy p,
+.lp-band-anim.is-in .lp-band-shot {
+    opacity: 1;
+    transform: none;
+    transition: opacity .7s ease, transform .7s cubic-bezier(.2, .7, .3, 1);
+}
+
+.lp-band-anim.is-in .lp-band-copy p { transition-delay: .12s; }
+.lp-band-anim.is-in .lp-band-shot { transition-delay: .06s; }
+.lp-band-anim.is-in .lp-band-copy h2::after { width: 34px; }
+
+/* Placeholder for artwork that has not arrived yet. */
+.lp-ph {
+    aspect-ratio: 450 / 920;
+    border: 1px solid color-mix(in oklab, var(--lp-tint) 30%, var(--lp-bg));
+    border-radius: 26px;
+    background: repeating-linear-gradient(135deg,
+        color-mix(in oklab, var(--lp-tint) 12%, var(--lp-bg)) 0 8px,
+        transparent 8px 16px);
+    display: grid;
+    place-items: center;
+    text-align: center;
+}
+
+.lp-ph span {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--lp-muted);
+    padding: 14px;
+}
+
+/* ── Sections ── */
+
+.lp-section {
+    padding: 56px 0 0;
+    margin-top: 60px;
+    border-top: 1px solid var(--lp-divider);
+}
+
+/* The band already ends in a hairline, so the section that follows it does not
+ * need one of its own. */
+.lp-wrap > .lp-section:first-child {
+    border-top: 0;
+    margin-top: 0;
+    padding-top: 60px;
+}
+
+.lp-section > h2 {
+    font-size: 25px;
+    line-height: 1.2;
+    letter-spacing: .2px;
+    margin: 0 0 28px;
 }
 
 /* ── Feature rows ── */
 
-.lp-section {
-    padding: 56px 0;
-    border-top: 1px solid var(--lp-divider);
-    margin-top: 56px;
-}
-
-.lp-section > h2 {
-    font-size: 27px;
-    letter-spacing: .8px;
-    margin: 0 0 32px;
-    text-align: center;
-}
-
-.lp-features {
+/* Hairline-separated rows, not a grid of boxes: the app itself is lists on a
+ * plain ground, and six bordered cards read busier than the product does. */
+.lp-rows {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 10px;
+    border-top: 1px solid var(--lp-divider);
 }
 
-.lp-feature {
-    background: var(--lp-card);
-    border: 1px solid var(--lp-border);
-    border-radius: 14px;
-    padding: 20px;
+.lp-row {
+    display: grid;
+    gap: 6px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--lp-divider);
 }
 
-.lp-feature h3 {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
+.lp-row h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 1.3;
+    letter-spacing: 0;
+    margin: 0;
+}
+
+/* A short rule in the app's Rose accent under each title. It grows from zero
+ * as the row arrives and lengthens a little on hover: the only movement in the
+ * section, and it is 550ms of easing, not a bounce. */
+.lp-row h3::after {
+    content: "";
+    display: block;
+    width: 26px;
+    height: 2px;
+    margin-top: 9px;
+    border-radius: 2px;
+    background: var(--lp-tint);
+    transition: width .55s cubic-bezier(.2, .7, .3, 1);
+}
+
+.lp-row:hover h3::after { width: 46px; }
+
+.lp-row p {
+    margin: 0;
     font-size: 15px;
-    margin: 0 0 6px;
+    color: var(--lp-muted);
+    color: var(--lp-body);
+    max-width: 56ch;
 }
+
+/* Scroll reveal. The hidden state is only applied once the script has added
+ * .lp-anim, so with JS off or reduced motion on, every row is simply visible. */
+.lp-anim .lp-row {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.lp-anim .lp-row h3::after { width: 0; }
+
+.lp-anim .lp-row.is-in {
+    opacity: 1;
+    transform: none;
+    transition: opacity .55s ease, transform .55s cubic-bezier(.2, .7, .3, 1);
+}
+
+.lp-anim .lp-row.is-in h3::after { width: 26px; transition-delay: .12s; }
+.lp-anim .lp-row.is-in:hover h3::after { width: 46px; }
 
 /* Marks a feature that needs a subscription. Quiet, but it has to be visible
- * in the same glance as the feature name — a reader scanning this grid is
+ * in the same glance as the feature name — a reader scanning this list is
  * forming a view of what the free app does. */
 .lp-premium {
     display: inline-block;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: .6px;
     text-transform: uppercase;
     vertical-align: middle;
-    margin-left: 6px;
+    margin-left: 8px;
     padding: 2px 8px;
     border-radius: 20px;
     border: 1px solid var(--lp-border);
     color: var(--lp-muted);
 }
 
-.lp-feature p {
-    margin: 0;
-    font-size: 15px;
-    color: var(--lp-muted);
-}
-
 /* ── FAQ ── */
 
-.lp-faq { display: flex; flex-direction: column; gap: 0; }
+.lp-faq {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--lp-divider);
+}
 
 .lp-faq details {
     border-bottom: 1px solid var(--lp-divider);
     padding: 16px 0;
 }
 
-.lp-faq details:first-of-type { border-top: 1px solid var(--lp-divider); }
-
 .lp-faq summary {
     cursor: pointer;
-    font-weight: 600;
-    font-size: 15px;
+    font-weight: 500;
+    font-size: 16px;
     list-style: none;
     display: flex;
     justify-content: space-between;
@@ -290,7 +581,31 @@
     margin: 10px 0 0;
     font-size: 15px;
     color: var(--lp-muted);
-    max-width: 60ch;
+}
+
+.lp-faq a { color: var(--lp-text); text-decoration: underline; text-underline-offset: 2px; }
+.lp-faq a:hover { color: var(--lp-muted); }
+
+/* ── Closing download ── */
+
+.lp-close {
+    padding: 56px 0 8px;
+    margin-top: 60px;
+    border-top: 1px solid var(--lp-divider);
+}
+
+.lp-close h2 {
+    font-size: 25px;
+    line-height: 1.2;
+    margin: 0 0 8px;
+    max-width: 22ch;
+}
+
+.lp-close p {
+    margin: 0 0 18px;
+    font-size: 15px;
+    color: var(--lp-muted);
+    max-width: 44ch;
 }
 
 /* ── Footer ── */
@@ -298,7 +613,7 @@
 .lp-foot {
     border-top: 1px solid var(--lp-divider);
     margin-top: 56px;
-    padding: 28px 0 48px;
+    padding: 26px 0 44px;
     display: flex;
     flex-wrap: wrap;
     gap: 12px 24px;
@@ -314,14 +629,98 @@
 
 /* ── Wider screens ── */
 
-@media (min-width: 700px) {
-    .lp-hero { padding: 64px 0 32px; }
-    .lp-hero h1 { font-size: 50px; }
-    .lp-hero p { font-size: 18px; }
-    .lp-shots { grid-template-columns: repeat(3, 1fr); align-items: start; }
-    .lp-features { grid-template-columns: 1fr 1fr; }
+@media (min-width: 720px) {
+    .lp-hero {
+        grid-template-columns: 1.15fr .85fr;
+        align-items: end;
+        column-gap: 56px;
+        row-gap: 0;
+        padding: 76px 0 12px;
+    }
+
+    .lp-hero h1 {
+        font-size: 58px;
+        line-height: 1.06;
+        letter-spacing: -1px;
+        max-width: 15ch;
+        grid-row: span 2;
+    }
+
+    .lp-hero p { font-size: 17px; margin-bottom: 22px; }
+    .lp-hero .lp-list li { font-size: 17px; }
+    .lp-hero .lp-list { margin-bottom: 16px; }
+
+    /* Flat overlap: the middle device sits forward and full size, the outer
+     * two a touch smaller and lower. No rotation, so Apple's artwork is never
+     * distorted. Every offset is a multiple of --lp-dw. */
+    .lp-shots { padding-top: 72px; }
+
+    .lp-stack {
+        display: block;
+        position: relative;
+        --lp-dw: clamp(180px, 21vw, 240px);
+        width: calc(var(--lp-dw) * 2.56);
+        height: calc(var(--lp-dw) * 2.32);
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .lp-stack figure { position: absolute; top: 0; max-width: none; width: var(--lp-dw); }
+
+    .lp-stack figure:nth-of-type(1) { left: 0; top: calc(var(--lp-dw) * .12); width: calc(var(--lp-dw) * .94); z-index: 1; }
+    .lp-stack figure:nth-of-type(2) { left: calc(var(--lp-dw) * .8); top: 0; z-index: 3; }
+    .lp-stack figure:nth-of-type(3) { left: calc(var(--lp-dw) * 1.62); top: calc(var(--lp-dw) * .12); width: calc(var(--lp-dw) * .94); z-index: 2; }
+
+    /* Captions belong to the group, not to each phone, once they overlap. */
+    .lp-stack figcaption { display: none; }
+
+    .lp-section > h2, .lp-close h2 { font-size: 32px; }
+
+    .lp-rows { grid-template-columns: 1fr 1fr; column-gap: 56px; }
+
+    .lp-row {
+        grid-template-columns: 1fr;
+        padding: 22px 0;
+    }
+
+    /* Rows run the full measure of the page so the hairlines line up with every
+     * other rule on the page; only the answer text is held to a reading width. */
+    .lp-faq summary { font-size: 17px; }
+
+    .lp-band { padding: 72px 0; margin-top: 76px; }
+
+    .lp-band-in {
+        grid-template-columns: 1fr auto;
+        column-gap: 64px;
+    }
+
+    .lp-band-copy h2 { font-size: 34px; }
+    .lp-band-copy p { font-size: 17px; }
+    .lp-band-shot { max-width: 248px; }
+
+    .lp-close {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 40px;
+    }
+
+    .lp-close p { margin-bottom: 0; }
+    .lp-close .lp-cta { margin: 0; }
+}
+
+@media (min-width: 980px) {
+    .lp-hero h1 { font-size: 66px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .lp * { transition: none !important; }
+    .lp-list li, .lp-sub p { animation: none; }
+    .lp-band-shot::before { animation: none; opacity: .7; }
+    .lp-band-anim .lp-band-copy h2,
+    .lp-band-anim .lp-band-copy p,
+    .lp-band-anim .lp-band-shot { opacity: 1; transform: none; }
+    .lp-band-anim .lp-band-copy h2::after { width: 34px; }
+    .lp-anim .lp-row { opacity: 1; transform: none; }
+    .lp-anim .lp-row h3::after { width: 26px; }
 }

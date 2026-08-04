@@ -20,7 +20,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="landing.css">
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
@@ -66,58 +66,89 @@
         </div>
 
         <header class="lp-hero">
-            <h1>The gift app that remembers everything so you don't have to.</h1>
-            <p>Birthdays, the thing they mentioned in passing, their size, what you bought them last year. Toayen keeps it all in one place so nothing lands late or twice.</p>
+            <h1>The gift app that remembers everything <span class="lp-soft">so you don't have to.</span></h1>
+            <div class="lp-sub">
+                <ul class="lp-list">
+                    <li>People</li>
+                    <li>Occasions</li>
+                    <li>Gift Ideas</li>
+                    <li>Spending history</li>
+                </ul>
+                <p>Toayen keeps all of it in one place.</p>
+            </div>
             <!-- Apple's official badge, unmodified, from their Marketing
                  Resources. Guidelines require it to contrast with its
                  background, so the white variant is served in dark mode.
                  Height is set and width left auto so it can never distort. -->
-            <a class="lp-badge" href="https://apps.apple.com/app/id6788513717">
-                <img class="lp-badge-light" src="assets/appstore-badge-black.svg" alt="Download Toayen on the App Store">
-                <img class="lp-badge-dark" src="assets/appstore-badge-white.svg" alt="" aria-hidden="true">
-            </a>
-            <span class="lp-cta-note">Free to download. iPhone and iPad, iOS 17 or later.</span>
+            <div class="lp-cta">
+                <a class="lp-badge" href="https://apps.apple.com/app/id6788513717">
+                    <img class="lp-badge-light" src="assets/appstore-badge-black.svg" alt="Download Toayen on the App Store">
+                    <img class="lp-badge-dark" src="assets/appstore-badge-white.svg" alt="" aria-hidden="true">
+                </a>
+                <span class="lp-cta-note">Free to download. iPhone and iPad, iOS 17 or later.</span>
+            </div>
         </header>
 
         <div class="lp-shots">
-            <figure class="lp-shot">
-                <img src="assets/shots/home.jpg" width="720" height="1565" alt="The Toayen home screen, showing what is coming up and how much has been spent this year." loading="lazy">
-                <figcaption>See what's coming, at a glance.</figcaption>
-            </figure>
-            <figure class="lp-shot">
-                <img src="assets/shots/gift-ideas.jpg" width="720" height="1565" alt="A list of saved gift ideas, each showing who it is for, its price and whether it has been bought." loading="lazy">
-                <figcaption>Keep every idea in one list.</figcaption>
-            </figure>
-            <figure class="lp-shot">
-                <img src="assets/shots/occasions.jpg" width="720" height="1565" alt="Upcoming occasions including birthdays, an anniversary dinner and Christmas, each counting down." loading="lazy">
-                <figcaption>Never miss the date.</figcaption>
-            </figure>
+            <div class="lp-stack">
+                <figure>
+                    <img src="assets/framed/gift-ideas.png" width="450" height="920" alt="A list of saved gift ideas, each showing who it is for, its price and whether it has been bought." loading="lazy">
+                    <figcaption>Keep every idea in one list.</figcaption>
+                </figure>
+                <figure>
+                    <img src="assets/framed/home.png" width="450" height="920" alt="The Toayen home screen, showing what is coming up and how much has been spent this year." loading="lazy">
+                    <figcaption>See what's coming, at a glance.</figcaption>
+                </figure>
+                <figure>
+                    <img src="assets/framed/occasions.png" width="450" height="920" alt="Upcoming occasions including birthdays, an anniversary dinner and Christmas, each counting down." loading="lazy">
+                    <figcaption>Never miss the date.</figcaption>
+                </figure>
+            </div>
         </div>
+
+    </div>
+
+    <!-- The one place the accent carries meaning rather than decoration. Sits
+         outside .lp-wrap so the tint is genuinely full bleed, with no 100vw
+         arithmetic that a scrollbar could turn into a sideways scroll. -->
+    <section class="lp-band">
+        <div class="lp-wrap lp-band-in">
+            <div class="lp-band-copy">
+                <h2>Toayen knows who you are buying for.</h2>
+                <p>Personalised gift suggestions built from what you have recorded about each person.</p>
+            </div>
+            <div class="lp-band-shot">
+                <img src="assets/framed/ai-suggestions.png" width="450" height="920" alt="A person's page in Toayen showing suggested gifts, each with an estimated price and a line explaining why it suits them." loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <div class="lp-wrap">
 
         <section class="lp-section" id="features">
             <h2>What it does</h2>
-            <div class="lp-features">
-                <div class="lp-feature">
+            <div class="lp-rows">
+                <div class="lp-row">
                     <h3>Remembers the people, not just the dates</h3>
                     <p>Interests, sizes, what to avoid, and the offhand comment in March that turns into the right present in November.</p>
                 </div>
-                <div class="lp-feature">
+                <div class="lp-row">
                     <h3>Every occasion in one place</h3>
                     <p>Birthdays, Christmas, anniversaries and the ones that matter only to you, each counting down, each with its own list.</p>
                 </div>
-                <div class="lp-feature">
+                <div class="lp-row">
                     <h3>Save ideas the moment you see them</h3>
                     <p>Share a link from a shop straight into Toayen. It picks up the price and the seller where it can, and you can always type them yourself.</p>
                 </div>
-                <div class="lp-feature">
+                <div class="lp-row">
                     <h3>Know what you actually spent</h3>
                     <p>Every gift you mark as bought is recorded, so by December you know exactly where the money went.</p>
                 </div>
-                <div class="lp-feature">
+                <div class="lp-row">
                     <h3>Share what you like</h3>
                     <p>Send your own card, sizes and interests included, so the people buying for you have something to go on.</p>
                 </div>
-                <div class="lp-feature">
+                <div class="lp-row">
                     <h3>Plan together <span class="lp-premium">Premium</span></h3>
                     <p>Invite family to a shared occasion so nobody buys the same thing twice. Joining someone else's shared occasion is free.</p>
                 </div>
@@ -154,6 +185,20 @@
             </div>
         </section>
 
+        <div class="lp-close">
+            <div>
+                <h2>Free to download, with an optional Premium subscription.</h2>
+                <p>Toayen is currently iPhone and iPad only.</p>
+            </div>
+            <div class="lp-cta">
+                <a class="lp-badge" href="https://apps.apple.com/app/id6788513717">
+                    <img class="lp-badge-light" src="assets/appstore-badge-black.svg" alt="Download Toayen on the App Store">
+                    <img class="lp-badge-dark" src="assets/appstore-badge-white.svg" alt="" aria-hidden="true">
+                </a>
+                <span class="lp-cta-note">iOS 17 or later.</span>
+            </div>
+        </div>
+
         <footer class="lp-foot">
             <span>&copy; 2026 Toayen. Made with care.</span>
             <nav>
@@ -165,6 +210,41 @@
         </footer>
 
     </div>
+
+    <!-- Feature rows arrive as you reach them. Progressive enhancement: the
+         hidden state lives behind .lp-anim, which is only added here, so with
+         JS off or reduced motion on the rows are visible from the start. -->
+    <script>
+    (function () {
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!('IntersectionObserver' in window) || reduce) return;
+
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                var d = e.target.getAttribute('data-delay');
+                if (d) e.target.style.transitionDelay = d + 'ms';
+                e.target.classList.add('is-in');
+                io.unobserve(e.target);
+            });
+        }, { threshold: .2, rootMargin: '0px 0px -8% 0px' });
+
+        var wrap = document.querySelector('#features .lp-rows');
+        if (wrap) {
+            wrap.classList.add('lp-anim');
+            Array.prototype.forEach.call(wrap.querySelectorAll('.lp-row'), function (r, i) {
+                r.setAttribute('data-delay', (i % 2) * 90 + Math.floor(i / 2) * 40);
+                io.observe(r);
+            });
+        }
+
+        var band = document.querySelector('.lp-band');
+        if (band) {
+            band.classList.add('lp-band-anim');
+            io.observe(band);
+        }
+    })();
+    </script>
 
 </body>
 </html>
