@@ -95,7 +95,14 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
 }
 
 /* The soft close. Honest and small: the article has to stand on its own, and
- * someone who found it useful should feel invited, not harvested. */
+ * someone who found it useful should feel invited, not harvested.
+ *
+ * The call to action reuses .lp-badge from landing.css rather than styling its
+ * own button. Two reasons. Apple's guidelines require their supplied artwork
+ * for a badge, and a hand-styled one was invisible in both themes: the colour
+ * rule sat on .pg-cta-link (one class) while .pg-article a (class plus
+ * element) outranked it, so the text inherited the body colour and landed on
+ * an identical background. */
 .pg-cta {
     background: var(--lp-card);
     border: 1px solid var(--lp-border);
@@ -107,20 +114,7 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
 .pg-cta p { font-size: 16px; margin: 0 0 14px; color: var(--lp-muted); }
 .pg-cta p strong { color: var(--lp-text); }
 
-.pg-cta-link {
-    display: inline-block;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
-    font-size: 15px;
-    text-decoration: none;
-    color: var(--lp-bg);
-    background: var(--lp-accent);
-    padding: 11px 20px;
-    border-radius: 12px;
-}
 
-.pg-cta-link:hover { opacity: .85; }
-.pg-cta-link:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 3px; }
 
 /* Related reading */
 .pg-more {
