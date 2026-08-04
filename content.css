@@ -11,15 +11,11 @@
  * accent used to mark rather than decorate, and --lp-body for long prose so a
  * full article does not read flat.
  *
- * Column width is a compromise. The header and footer span the full 1060px
- * wrap, and a centred narrow column inside that frame reads as though nothing
- * lines up. But prose at 1060px runs to roughly 130 characters a line, about
- * double what is comfortable, and the eye loses its place coming back to the
- * left edge.
- *
- * So: left edge flush with the header and footer, and a measure widened to
- * 46em, around 90 characters. Wider than ideal for reading, narrow enough to
- * still be readable, and now visibly part of the same grid as everything else.
+ * Column width went through three attempts. Centred and narrow left half the
+ * frame empty; flush to both edges ran the body to about 110 characters a
+ * line, well past comfortable. The answer was neither: keep the prose at a
+ * readable measure and give the space on the right to the related links, so
+ * the block still aligns with the header and footer at both edges.
  */
 
 .pg-article {
@@ -226,18 +222,64 @@ a.pg-eyebrow:hover { color: var(--lp-text); }
 .pg-index p { margin: 0; font-size: 15px; color: var(--lp-body); max-width: 56ch; }
 
 @media (min-width: 720px) {
-    .pg-article h1 { font-size: 42px; }
-    /* Flush to both edges of the wrap, so the column matches the header and
-     * footer exactly. Graeme asked to see this version. The reading cost is
-     * real: around 110 characters a line at 1280px, against a comfortable
-     * 65 to 75. */
     .pg-article {
-        max-width: none;
+        max-width: 46em;
         padding-top: 24px;
     }
-    .pg-article h1 { max-width: 18ch; }
+    .pg-article h1 { font-size: 42px; max-width: 18ch; }
     .pg-standfirst { font-size: 19px; }
     .pg-article h2 { margin-top: 48px; }
+}
+
+/* Two columns once there is room for them. This is the resolution of the
+ * width problem: the prose keeps a readable measure while the related links
+ * occupy the space to the right, so the block still lines up with the header
+ * and footer without running to 110 characters a line.
+ *
+ * The article stays one element and the aside is placed by grid rather than
+ * by restructuring the markup, so the reading order in the HTML, and for a
+ * screen reader, is unchanged: article first, related links after. */
+@media (min-width: 980px) {
+    .pg-article {
+        max-width: none;
+        display: grid;
+        grid-template-columns: minmax(0, 44em) minmax(190px, 1fr);
+        column-gap: 60px;
+    }
+
+    .pg-article > * { grid-column: 1; }
+
+    .pg-more {
+        grid-column: 2;
+        /* span, not 1 / -1: with no explicit rows declared, -1 resolves to the
+         * end of the EXPLICIT grid, which is row 1, so the aside occupied a
+         * single row and stretched it to its own height, leaving a gap between
+         * the eyebrow and the headline. Every row here is implicit, so the
+         * span has to be a number. */
+        grid-row: 1 / span 100;
+        align-self: start;
+        position: sticky;
+        top: 34px;
+        margin-top: 8px;
+        padding-top: 0;
+        border-top: 0;
+    }
+
+    .pg-more h2 {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1.4px;
+        color: var(--lp-muted);
+        font-family: 'Hanken Grotesk', sans-serif;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+
+    .pg-more li { margin-bottom: 16px; font-size: 15px; line-height: 1.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pg-more { position: static; }
 }
 
 @media (prefers-reduced-motion: reduce) {

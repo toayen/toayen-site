@@ -60,8 +60,19 @@
 }
 
 /* Belt and braces against a sideways scroll: html is the scrolling box, so
- * clipping on body alone would not hold. */
+ * clipping on body alone would not hold.
+ *
+ * clip rather than hidden wherever it is supported. overflow-x: hidden forces
+ * overflow-y to auto, which makes html a scroll container and silently breaks
+ * position: sticky for every descendant. That is what stopped the article
+ * sidebar sticking. clip does the same clipping without creating one; hidden
+ * stays as the fallback, where the worst case is a sideways scroll rather
+ * than a broken layout. */
 html, .lp { overflow-x: hidden; }
+
+@supports (overflow: clip) {
+    html, .lp { overflow-x: clip; }
+}
 
 .lp-wrap {
     max-width: 1060px;
