@@ -468,13 +468,20 @@
             return;
         }
 
-        // Path: /c/CODE — anything else on this 404 page is a genuine miss.
-        var match = location.pathname.match(/^\/c\/([A-Za-z0-9]{4,12})\/?$/);
+        // Path: /c/CODE/KEY, or the older /c/CODE with the key in the
+        // fragment. The key moved into the path because Messages strips
+        // fragments before handing a universal link to the app, so the card
+        // opened to nothing (#303). Both shapes are accepted: links already
+        // in circulation keep working until they expire at 90 days.
+        // Anything else on this 404 page is a genuine miss.
+        var match = location.pathname.match(/^\/c\/([A-Za-z0-9]{4,12})(?:\/([A-Za-z0-9_%-]{1,120}))?\/?$/);
         if (!match) { fail('notfound'); return; }
         var code = match[1].toUpperCase();
 
-        // The unseal key rides the fragment and never leaves this page.
-        var keyRaw = location.hash ? location.hash.slice(1) : '';
+        // The unseal key never leaves this page — no request carries it, and
+        // the fragment never reached a server in the first place. Path
+        // segment first, fragment as the fallback for older links.
+        var keyRaw = match[2] || (location.hash ? location.hash.slice(1) : '');
         try { keyRaw = decodeURIComponent(keyRaw); } catch (e) { /* keep as-is */ }
         if (!keyRaw || keyRaw.length > 100) { fail('broken'); return; }
 
