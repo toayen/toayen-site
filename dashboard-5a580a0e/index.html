@@ -428,11 +428,13 @@
       inner += '<div class="testblock">Test data: <b>' + num(s.test.users) + " accounts</b> (" +
         num(s.test.premium_active) + " with sandbox premium) · " + num(s.test.devices) + " push devices</div>";
     }
+    var optin = s.devices === 1
+      ? (s.marketing_opt_in === 1 ? "and it allows tips &amp; offers" : "and it has tips &amp; offers switched off")
+      : "with tips &amp; offers on for " + num(s.marketing_opt_in) + " of them";
     inner += '<div class="note">Pushes can reach ' + num(s.devices) +
       (s.devices === 1 ? " device" : " devices") +
-      " — a device registers only once notifications are allowed, so users who declined are not counted. Tips &amp; offers is on for " +
-      num(s.marketing_opt_in) + " of " + (s.devices === 1 ? "it" : "them") +
-      ". Sign-in is optional — anonymous users appear under Activity.</div>";
+      " — a device registers only once notifications are allowed, so users who declined are not counted — " +
+      optin + ". Sign-in is optional — anonymous users appear under Activity.</div>";
     return section("Users", inner, "users");
   }
 
