@@ -298,7 +298,7 @@
     categories: { t: "Categories", b: "<b>Bugs</b> = something broken. <b>Features</b> = enhancements and new ideas. <b>Marketing</b> = growth work, not app code. <b>Other</b> = everything unlabelled — docs, chores, questions." },
     appstore: { t: "App Store", b: "Live version status straight from App Store Connect, the public star rating per storefront, and the latest written customer reviews. TestFlight feedback is separate — it auto-files as GitHub issues and shows under Work." },
     activity: { t: "Activity", b: "Anonymous in-app events from <b>all devices</b>, signed-in or not — so this is the truest picture of real usage. No personal data: just event counts by day and country." },
-    devices: { t: "Push devices", b: "Devices registered for push notifications. <b>Tips &amp; offers</b> counts devices that left the marketing switch on — only those can receive campaign pushes." },
+    devices: { t: "Push devices", b: "Devices that can receive a push notification — <b>not the same as users</b>. A device registers only when its owner is signed in <b>and</b> has allowed notifications; decline the prompt and it never appears here. It counts devices, not people: one person with an iPhone and an iPad counts twice, a user who declined notifications counts zero. <b>Tips &amp; offers</b> is the subset of registered devices that also left the marketing switch on — only those can receive campaign pushes." },
     test: { t: "Test data", b: "Your own devices, TestFlight-era accounts, and Apple sandbox purchases. Hidden from every headline number so they reflect real customers — but kept, never deleted. Sandbox subscriptions behave strangely by design: an annual sub renews <b>every hour</b> during testing, which is why test 'revenue' looks huge." }
   };
 
@@ -428,8 +428,11 @@
       inner += '<div class="testblock">Test data: <b>' + num(s.test.users) + " accounts</b> (" +
         num(s.test.premium_active) + " with sandbox premium) · " + num(s.test.devices) + " push devices</div>";
     }
-    inner += '<div class="note">' + num(s.marketing_opt_in) + " of " + num(s.devices) +
-      " devices opted into tips &amp; offers. Sign-in is optional — anonymous users appear under Activity.</div>";
+    inner += '<div class="note">Pushes can reach ' + num(s.devices) +
+      (s.devices === 1 ? " device" : " devices") +
+      " — a device registers only once notifications are allowed, so users who declined are not counted. Tips &amp; offers is on for " +
+      num(s.marketing_opt_in) + " of " + (s.devices === 1 ? "it" : "them") +
+      ". Sign-in is optional — anonymous users appear under Activity.</div>";
     return section("Users", inner, "users");
   }
 
