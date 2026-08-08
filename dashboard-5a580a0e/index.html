@@ -10,25 +10,37 @@
 <title>Toayen · Mission Control</title>
 <link rel="apple-touch-icon" href="https://dnktcnfbkciiaengimhb.supabase.co/functions/v1/dashboard/icon.png">
 <link rel="icon" href="https://dnktcnfbkciiaengimhb.supabase.co/functions/v1/dashboard/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0F0F0F; --card: #1A1A1A; --border: #2A2A2A;
+    --bg: #0F0F0F; --card: #1A1A1A; --border: #2A2A2A; --line: #232323;
     --text: #F0F0F0; --muted: #8E8E8E; --faint: #444444;
-    --good: #8FB896; --warn: #D4AF8A; --bad: #E09099;
+    --good: #8FB896; --warn: #D4AF8A; --bad: #E09099; --info: #99ABB9;
+    --ft: "Outfit", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --fb: "DM Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
   body {
     background: var(--bg); color: var(--text);
-    font: 400 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-    padding: calc(env(safe-area-inset-top) + 16px) 20px calc(env(safe-area-inset-bottom) + 40px);
+    font: 400 14.5px/1.5 var(--fb);
+    padding: calc(env(safe-area-inset-top) + 14px) 20px calc(env(safe-area-inset-bottom) + 86px);
   }
-  .wrap { max-width: 520px; margin: 0 auto; }
+  body::before {
+    content: ""; position: fixed; top: -160px; left: 50%; transform: translateX(-50%);
+    width: 380px; height: 380px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,.045), transparent 62%);
+    pointer-events: none; z-index: 0;
+  }
+  .wrap { max-width: 520px; margin: 0 auto; position: relative; z-index: 1; }
 
-  header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-  header img { width: 40px; height: 40px; border-radius: 9px; border: 1px solid var(--border); }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  header img { width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--border); }
   header .t { flex: 1; }
-  header h1 { font-size: 19px; font-weight: 300; letter-spacing: 1.5px; }
-  header .sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  header h1 { font: 300 20px var(--ft); letter-spacing: 3px; }
+  header .sub { font-size: 11.5px; color: var(--muted); margin-top: 1px; letter-spacing: .3px; }
   #refresh {
     background: var(--card); border: 1px solid var(--border); color: var(--muted);
     border-radius: 12px; width: 40px; height: 40px; font-size: 17px; cursor: pointer;
@@ -36,68 +48,153 @@
   #refresh.busy { animation: spin 1s linear infinite; color: var(--text); }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  .view { display: none; }
+  .view.on { display: block; animation: fadein .2s ease-out; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  body:not(.booted) .card, body:not(.booted) .tiles, body:not(.booted) .banner {
+    animation: rise .35s ease-out both;
+  }
+  body:not(.booted) .card:nth-of-type(2) { animation-delay: .04s; }
+  body:not(.booted) .card:nth-of-type(3) { animation-delay: .08s; }
+  body:not(.booted) .card:nth-of-type(4) { animation-delay: .12s; }
+  body:not(.booted) .card:nth-of-type(5) { animation-delay: .16s; }
+  body:not(.booted) .card:nth-of-type(6) { animation-delay: .20s; }
+
   .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
   .tile {
     background: var(--card); border: 1px solid var(--border); border-radius: 14px;
     padding: 14px 12px; min-width: 0;
   }
-  .tile.wide { grid-column: span 3; display: flex; align-items: baseline; gap: 10px; }
-  .tile .v { font-size: 24px; font-weight: 200; letter-spacing: .3px; white-space: nowrap; }
-  .tile .k { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+  .tile .v { font: 200 24px var(--ft); letter-spacing: .3px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .tile .k { font: 600 10px var(--fb); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  .banner {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--card); border: 1px dashed var(--border); border-radius: 14px;
+    padding: 10px 14px; margin-bottom: 10px; font-size: 12.5px; color: var(--muted);
+  }
+  .banner .msg { flex: 1; }
+  .banner button {
+    background: none; border: 1px solid var(--border); color: var(--text); cursor: pointer;
+    border-radius: 20px; padding: 5px 13px; font: 600 11px var(--fb); letter-spacing: .3px;
+  }
+  .banner.showing { border-style: solid; border-color: rgba(212,175,138,.35); }
+  .banner.showing .msg { color: var(--warn); }
 
   .card {
     background: var(--card); border: 1px solid var(--border); border-radius: 14px;
     padding: 16px; margin-bottom: 10px;
   }
+  .h2row { display: flex; align-items: center; margin-bottom: 12px; }
   .card h2 {
-    font-size: 11px; font-weight: 500; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 12px;
+    font: 600 10.5px var(--fb); color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1.6px; flex: 1;
   }
-  .big { font-size: 30px; font-weight: 200; }
-  .big small { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 6px; letter-spacing: 0; }
+  .i {
+    width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border);
+    background: none; color: var(--muted); font: 600 11px Georgia, serif; font-style: italic;
+    cursor: pointer; line-height: 1; flex: none;
+  }
+  .big { font: 200 30px var(--ft); font-variant-numeric: tabular-nums; }
+  .big small { font: 400 13px var(--fb); color: var(--muted); margin-left: 6px; letter-spacing: 0; }
 
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin-top: 12px; }
   .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px 12px; margin-top: 12px; }
-  .kv .v { font-size: 17px; font-weight: 300; }
-  .kv .k { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 1px; }
+  .kv .v { font: 300 17px var(--ft); font-variant-numeric: tabular-nums; }
+  .kv .k { font: 600 10px var(--fb); color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
 
   .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
   .row .lbl { width: 96px; flex: none; font-size: 12.5px; color: var(--muted); }
-  .row .bar { flex: 1; height: 4px; background: #232323; border-radius: 2px; overflow: hidden; }
+  .row .bar { flex: 1; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
   .row .bar i { display: block; height: 100%; background: var(--faint); border-radius: 2px; }
   .row .n { width: 34px; flex: none; text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; }
 
-  .split { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin: 10px 0 6px; background: #232323; }
+  .split { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin: 10px 0 6px; background: var(--line); gap: 1px; }
   .split i { display: block; height: 100%; }
 
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .chip {
-    font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
-    background: #232323; color: var(--muted); letter-spacing: .3px;
+    font: 600 11px var(--fb); padding: 4px 10px; border-radius: 20px;
+    background: var(--line); color: var(--muted); letter-spacing: .3px;
   }
   .chip.bad { color: var(--bad); background: rgba(224,144,153,.12); }
   .chip.warn { color: var(--warn); background: rgba(212,175,138,.10); }
   .chip.good { color: var(--good); background: rgba(143,184,150,.10); }
 
-  .list { margin-top: 10px; }
-  .item { padding: 9px 0; border-top: 1px solid #222; font-size: 13.5px; display: flex; gap: 8px; }
-  .item:first-child { border-top: 0; }
-  .item .no { color: var(--muted); flex: none; font-variant-numeric: tabular-nums; }
-  .item .ti { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .item .tag { flex: none; font-size: 10.5px; color: var(--muted); padding-top: 2px; }
+  .seg { display: flex; gap: 6px; margin-top: 14px; overflow-x: auto; scrollbar-width: none; }
+  .seg::-webkit-scrollbar { display: none; }
+  .seg button {
+    flex: none; background: var(--line); border: 1px solid transparent; color: var(--muted);
+    border-radius: 20px; padding: 6px 13px; font: 600 11.5px var(--fb); cursor: pointer; letter-spacing: .3px;
+  }
+  .seg button.on { background: var(--text); color: var(--bg); }
 
-  .spark { width: 100%; height: 40px; display: block; margin-top: 10px; }
-  .note { font-size: 11.5px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+  .list { margin-top: 10px; }
+  .item { padding: 10px 0; border-top: 1px solid var(--line); font-size: 13.5px; display: flex; gap: 8px; align-items: baseline; }
+  .item:first-child { border-top: 0; }
+  .item .no { color: var(--muted); flex: none; font-variant-numeric: tabular-nums; font-size: 12px; }
+  .item .ti { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item .tag { flex: none; font-size: 10.5px; color: var(--muted); }
+  a.item { color: var(--text); text-decoration: none; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; align-self: center; background: var(--faint); }
+
+  .spark { width: 100%; height: 44px; display: block; margin-top: 10px; }
+  .spark .ln { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1s ease-out forwards; }
+  body.booted .spark .ln { animation: none; stroke-dashoffset: 0; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .note { font-size: 11.5px; color: var(--muted); margin-top: 12px; line-height: 1.55; }
   .miss { font-size: 13px; color: var(--muted); }
   .miss code { color: var(--text); font-size: 12px; }
   .err { color: var(--bad); font-size: 13px; }
   .muted { color: var(--muted); }
-  .good { color: var(--good); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+  .good { color: var(--good); } .warn { color: var(--warn); } .bad { color: var(--bad); } .infoc { color: var(--info); }
   .stars { color: var(--warn); letter-spacing: 2px; }
+  .testblock {
+    margin-top: 12px; padding: 10px 12px; border: 1px dashed rgba(212,175,138,.35);
+    border-radius: 10px; font-size: 12.5px; color: var(--muted); line-height: 1.6;
+  }
+  .testblock b { color: var(--warn); font-weight: 600; }
 
-  #login { max-width: 320px; margin: 22vh auto 0; text-align: center; }
-  #login img { width: 64px; height: 64px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 18px; }
-  #login h1 { font-size: 20px; font-weight: 300; letter-spacing: 2px; margin-bottom: 24px; }
+  nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    background: rgba(15,15,15,.85); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border-top: 1px solid var(--line); display: flex;
+    padding: 8px 0 calc(env(safe-area-inset-bottom) + 8px);
+  }
+  nav button {
+    flex: 1; background: none; border: 0; color: var(--faint); cursor: pointer;
+    font: 500 10px var(--fb); letter-spacing: .4px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 2px 0;
+  }
+  nav button.on { color: var(--text); }
+  nav svg { width: 22px; height: 22px; }
+
+  #dim {
+    position: fixed; inset: 0; background: rgba(0,0,0,.55); opacity: 0;
+    pointer-events: none; transition: opacity .25s; z-index: 40;
+  }
+  #dim.on { opacity: 1; pointer-events: auto; }
+  #sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 41;
+    background: var(--card); border: 1px solid var(--border); border-bottom: 0;
+    border-radius: 20px 20px 0 0; max-width: 560px; margin: 0 auto;
+    padding: 14px 22px calc(env(safe-area-inset-bottom) + 26px);
+    transform: translateY(105%); transition: transform .3s cubic-bezier(.32,.72,.3,1);
+  }
+  #sheet.on { transform: none; }
+  #sheet .grab { width: 36px; height: 4px; border-radius: 2px; background: var(--faint); margin: 0 auto 16px; }
+  #sheet h3 { font: 300 18px var(--ft); letter-spacing: .5px; margin-bottom: 10px; }
+  #sheet .b { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+  #sheet .b b { color: var(--text); font-weight: 600; }
+
+  #login { max-width: 320px; margin: 20vh auto 0; text-align: center; }
+  #login img {
+    width: 68px; height: 68px; border-radius: 15px; border: 1px solid var(--border);
+    margin-bottom: 20px; box-shadow: 0 0 44px rgba(255,255,255,.07);
+  }
+  #login h1 { font: 300 20px var(--ft); letter-spacing: 3px; margin-bottom: 26px; }
   #login input {
     width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text);
     border-radius: 10px; padding: 13px 14px; font-size: 16px; margin-bottom: 10px; outline: none;
@@ -105,11 +202,11 @@
   #login input:focus { border-color: var(--faint); }
   #login button {
     width: 100%; background: var(--text); color: var(--bg); border: 0; border-radius: 12px;
-    padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer;
+    padding: 13px; font: 600 15px var(--fb); cursor: pointer;
   }
   #login .err { margin-top: 12px; min-height: 18px; }
   .hidden { display: none; }
-  footer { text-align: center; font-size: 11px; color: var(--faint); margin-top: 24px; letter-spacing: 1px; }
+  footer { text-align: center; font-size: 11px; color: var(--faint); margin-top: 22px; letter-spacing: 1px; }
 </style>
 </head>
 <body>
@@ -131,18 +228,36 @@
     </div>
     <button id="refresh" title="Refresh">&#8635;</button>
   </header>
-  <div id="content"></div>
+  <div id="view-overview" class="view on"></div>
+  <div id="view-work" class="view"></div>
   <footer>mission control</footer>
 </div>
+
+<nav id="tabs" class="hidden">
+  <button id="tab-overview" class="on">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>
+    Overview
+  </button>
+  <button id="tab-work">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="M4 6.5l1 1 2-2.5"/><path d="M4 12.5l1 1 2-2.5"/><path d="M4 18.5l1 1 2-2.5"/></svg>
+    Work
+  </button>
+</nav>
+
+<div id="dim"></div>
+<div id="sheet"><div class="grab"></div><h3 id="sheetTitle"></h3><div class="b" id="sheetBody"></div></div>
 
 <script>
 (function () {
   "use strict";
-  // Absolute: the page is hosted in Supabase Storage (or anywhere), while the
-  // data API lives on the edge function. CORS on the function allows this.
   var BASE = "https://dnktcnfbkciiaengimhb.supabase.co/functions/v1/dashboard";
+  var REPO_URL = "https://github.com/toayen/toayen-ios/issues/";
   var LS = "toayen_dashboard_key";
+  var LS_TEST = "toayen_dashboard_show_test";
   var lastLoad = 0;
+  var lastData = null;
+  var showTest = localStorage.getItem(LS_TEST) === "1";
+  var workFilter = "all";
 
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) {
@@ -163,11 +278,33 @@
     if (n >= 10000) return (n / 1000).toFixed(1) + "k";
     return n.toLocaleString();
   };
+
+  // ---- info sheet content (plain English, no jargon) ----------------------
+  var INFO = {
+    users: { t: "Users", b: "Counts <b>signed-in accounts only</b> — sign-in is optional, so people who use the app without an account appear only under Activity. Your own test devices and TestFlight-era accounts are excluded from these numbers; the toggle above the cards reveals them." },
+    mrr: { t: "Est. MRR", b: "<b>Monthly Recurring Revenue</b> — a run-rate, not money received. It assumes every currently active subscriber keeps paying: each monthly sub adds $2.99, each annual sub adds $19.99 divided by 12 (about $1.67). Apple's commission is not deducted, and test subscriptions are excluded." },
+    gross: { t: "Gross estimates", b: "Each real <b>subscribed</b> or <b>renewed</b> event counts once at its USD list price ($2.99 monthly, $19.99 annual). It is an <b>estimate before Apple's 15–30% commission</b>, not a payout — Apple pays out roughly a month after each fiscal month closes. Only purchases Apple confirmed in its production environment count; TestFlight sandbox renewals (annual subs fake-renew every hour during testing) are excluded." },
+    revevents: { t: "Subscription events", b: "What Apple told us in the last 30 days: <b>subscribed</b> = new subscription, <b>renewed</b> = an existing one billed again, <b>expired</b> = lapsed, <b>revoked</b> = refunded or cancelled by Apple. Only production events are shown here; the test toggle reveals sandbox ones." },
+    ai: { t: "AI usage & cost", b: "What Toayen's AI features cost. The headline is an <b>in-house estimate</b> (every request's tokens × the model's price). The <b>billed by Anthropic</b> line is the real invoice figure from Anthropic's own reporting — it covers whole days, so today's spend appears tomorrow." },
+    credits: { t: "Credits remaining", b: "Anthropic has no balance API, so this is <b>derived</b>: the balance recorded on a baseline date, minus everything billed since. It drifts after a top-up until the baseline is reset (see docs/dashboard.md). Treat it as an approximation." },
+    work: { t: "Work", b: "Open GitHub issues by workflow stage: <b>ready</b> = waiting for a plan, <b>planned</b> = plan waiting for your approval, <b>approved</b> = being coded, <b>review</b> = fixed and waiting for your testing, <b>changes-needed</b> = failed testing. The Work tab breaks everything down by type — bugs, features, marketing." },
+    categories: { t: "Categories", b: "<b>Bugs</b> = something broken. <b>Features</b> = enhancements and new ideas. <b>Marketing</b> = growth work, not app code. <b>Other</b> = everything unlabelled — docs, chores, questions." },
+    appstore: { t: "App Store", b: "Live version status straight from App Store Connect, the public star rating per storefront, and the latest written customer reviews. TestFlight feedback is separate — it auto-files as GitHub issues and shows under Work." },
+    activity: { t: "Activity", b: "Anonymous in-app events from <b>all devices</b>, signed-in or not — so this is the truest picture of real usage. No personal data: just event counts by day and country." },
+    devices: { t: "Push devices", b: "Devices registered for push notifications. <b>Tips &amp; offers</b> counts devices that left the marketing switch on — only those can receive campaign pushes." },
+    test: { t: "Test data", b: "Your own devices, TestFlight-era accounts, and Apple sandbox purchases. Hidden from every headline number so they reflect real customers — but kept, never deleted. Sandbox subscriptions behave strangely by design: an annual sub renews <b>every hour</b> during testing, which is why test 'revenue' looks huge." }
+  };
+
+  // ---- small builders ------------------------------------------------------
+  var infoBtn = function (id) {
+    return INFO[id] ? '<button class="i" data-info="' + id + '" aria-label="Explain">i</button>' : "";
+  };
   var kv = function (v, k, cls) {
     return '<div class="kv"><div class="v ' + (cls || "") + '">' + v + '</div><div class="k">' + esc(k) + "</div></div>";
   };
-  var tile = function (v, k) {
-    return '<div class="tile"><div class="v">' + v + '</div><div class="k">' + esc(k) + "</div></div>";
+  var tile = function (v, k, raw, fmt) {
+    var cu = raw == null ? "" : ' data-cu="' + raw + '" data-fmt="' + (fmt || "num") + '"';
+    return '<div class="tile"><div class="v"' + cu + ">" + v + '</div><div class="k">' + esc(k) + "</div></div>";
   };
   var bars = function (rows, max) {
     var m = max || 1;
@@ -182,18 +319,21 @@
     if (!series || !series.length) return "";
     var max = 0.0001;
     series.forEach(function (p) { if (p.v > max) max = p.v; });
-    var W = 300, H = 40, PAD = 2;
+    var W = 300, H = 44, PAD = 2;
     var pts = series.map(function (p, i) {
       var x = PAD + i * (W - 2 * PAD) / Math.max(1, series.length - 1);
-      var y = H - PAD - (p.v / max) * (H - 2 * PAD);
+      var y = H - PAD - (p.v / max) * (H - 2 * PAD - 6);
       return x.toFixed(1) + "," + y.toFixed(1);
     });
+    var first = pts[0].split(","), last = pts[pts.length - 1].split(",");
+    var area = pts.join(" ") + " " + last[0] + "," + (H - PAD) + " " + first[0] + "," + (H - PAD);
     return '<svg class="spark" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none">' +
-      '<polyline points="' + pts.join(" ") + '" fill="none" stroke="' + color + '" stroke-width="1.5" ' +
-      'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+      '<polygon points="' + area + '" fill="' + color + '" opacity="0.08"/>' +
+      '<polyline class="ln" pathLength="1" points="' + pts.join(" ") + '" fill="none" stroke="' + color +
+      '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
   };
-  var section = function (title, inner) {
-    return '<div class="card"><h2>' + esc(title) + "</h2>" + inner + "</div>";
+  var section = function (title, inner, infoId) {
+    return '<div class="card"><div class="h2row"><h2>' + esc(title) + "</h2>" + infoBtn(infoId) + "</div>" + inner + "</div>";
   };
   var missing = function (what, secret) {
     return '<div class="miss">' + esc(what) + " — add the <code>" + esc(secret) + "</code> secret (docs/dashboard.md)</div>";
@@ -212,23 +352,52 @@
     if (!s) return "—";
     return STATE_LABELS[s] || String(s).toLowerCase().replace(/_/g, " ");
   };
+  var STAGE_META = {
+    ready: { l: "Ready", c: "var(--warn)" },
+    planned: { l: "Planned", c: "var(--muted)" },
+    approved: { l: "In progress", c: "var(--good)" },
+    review: { l: "To test", c: "var(--info)" },
+    "changes-needed": { l: "Changes needed", c: "var(--bad)" },
+    none: { l: "Unlabelled", c: "var(--faint)" },
+  };
+  var CATS = [
+    { k: "all", l: "All" }, { k: "bug", l: "Bugs" }, { k: "enhancement", l: "Features" },
+    { k: "marketing", l: "Marketing" }, { k: "other", l: "Other" },
+  ];
 
-  // ---- section renderers --------------------------------------------------
+  // ---- overview sections ---------------------------------------------------
 
   function heroHtml(d) {
-    var u = d.users, r = d.revenue, ai = d.ai, gi = d.defects;
+    var u = d.users, r = d.revenue, ai = d.ai, w = d.work;
+    var uo = u && u.ok, ro = r && r.ok;
     return '<div class="tiles">' +
-      tile(u && u.ok ? num(u.total) : "—", "Users") +
-      tile(u && u.ok ? num(u.premium_active) : "—", "Premium") +
-      tile(gi && gi.ok && gi.connected ? num(gi.open) : "—", "Open issues") +
-      "</div><div class=\"tiles\" style=\"grid-template-columns:1fr 1fr\">" +
-      tile(r && r.ok ? money(r.est_gross_ever) : "—", "Est. gross · ever") +
-      tile(ai && ai.ok ? money(ai.month.cost) : "—", "AI cost · month") +
+      tile(uo ? num(u.total) : "—", "Users", uo ? u.total : null, "num") +
+      tile(uo ? num(u.premium_active) : "—", "Premium", uo ? u.premium_active : null, "num") +
+      tile(ro ? money(r.est_mrr) : "—", "Est. MRR", ro ? r.est_mrr : null, "money") +
+      "</div><div class=\"tiles\">" +
+      tile(ro ? money(r.est_gross_ever) : "—", "Gross · ever", ro ? r.est_gross_ever : null, "money") +
+      tile(ai && ai.ok ? money(ai.month.cost) : "—", "AI · month", ai && ai.ok ? ai.month.cost : null, "money") +
+      tile(w && w.ok && w.connected ? num(w.open) : "—", "Open issues", w && w.ok && w.connected ? w.open : null, "num") +
       "</div>";
   }
 
+  function testBannerHtml(d) {
+    var u = d.users, r = d.revenue;
+    var tu = u && u.ok && u.test ? u.test.users : 0;
+    var evs = r && r.ok && r.test ? r.test.events_ever : {};
+    var te = 0;
+    Object.keys(evs || {}).forEach(function (k) { te += evs[k]; });
+    if (!tu && !te) return "";
+    var msg = showTest
+      ? "Showing test data — " + num(tu) + " test accounts, " + num(te) + " sandbox events"
+      : num(tu) + " test accounts &amp; " + num(te) + " sandbox events hidden";
+    return '<div class="banner' + (showTest ? " showing" : "") + '"><div class="msg">' + msg +
+      ' <button class="i" data-info="test" aria-label="Explain" style="vertical-align:-5px">i</button></div>' +
+      '<button id="testtoggle">' + (showTest ? "Hide" : "Show") + "</button></div>";
+  }
+
   function usersHtml(s) {
-    if (!s.ok) return section("Users", failed(s));
+    if (!s.ok) return section("Users", failed(s), "users");
     var inner = '<div class="big">' + num(s.total) + "<small>signed-in users</small></div>";
     var pf = s.premium_active + s.free;
     if (pf > 0) {
@@ -246,14 +415,19 @@
         return { l: c.code, n: c.count };
       })) + "</div>";
     }
+    if (showTest && s.test && s.test.users > 0) {
+      inner += '<div class="testblock">Test data: <b>' + num(s.test.users) + " accounts</b> (" +
+        num(s.test.premium_active) + " with sandbox premium) · " + num(s.test.devices) + " push devices</div>";
+    }
     inner += '<div class="note">' + num(s.marketing_opt_in) + " of " + num(s.devices) +
-      " devices opted into tips &amp; offers. Sign-in is optional, so anonymous users appear only under Activity.</div>";
-    return section("Users", inner);
+      " devices opted into tips &amp; offers. Sign-in is optional — anonymous users appear under Activity.</div>";
+    return section("Users", inner, "users");
   }
 
   function revenueHtml(s) {
-    if (!s.ok) return section("Revenue", failed(s));
-    var inner = '<div class="big">' + money(s.est_mrr) + "<small>est. MRR</small></div>" +
+    if (!s.ok) return section("Revenue", failed(s), "gross");
+    var inner = '<div class="h2row" style="margin:0 0 2px"><div class="big" style="flex:1">' + money(s.est_mrr) +
+      "<small>est. MRR</small></div>" + infoBtn("mrr") + "</div>" +
       '<div class="grid3">' +
       kv(money(s.est_gross_month), "this month") +
       kv(money(s.est_gross_year), "this year") +
@@ -265,20 +439,27 @@
       '<span class="chip good">+' + num(ev.subscribed || 0) + " subscribed</span>" +
       '<span class="chip">' + num(ev.renewed || 0) + " renewed</span>" +
       '<span class="chip warn">' + num(ev.expired || 0) + " expired</span>" +
-      '<span class="chip bad">' + num(ev.revoked || 0) + " revoked</span></div>" +
-      '<div class="note">Last 30 days. ' + esc(s.note || "") + "</div>";
-    return section("Revenue", inner);
+      '<span class="chip bad">' + num(ev.revoked || 0) + " revoked</span></div>";
+    if (showTest && s.test) {
+      var t = s.test;
+      inner += '<div class="testblock">Test / sandbox: <b>' + money(t.est_gross_ever) +
+        "</b> fake gross ever · " + money(t.est_mrr) + " fake MRR · " +
+        num(t.active_monthly + t.active_annual) + " sandbox subs</div>";
+    }
+    inner += '<div class="note">Real purchases only — Apple-verified in production, test devices excluded. ' +
+      esc(s.note || "") + "</div>";
+    return section("Revenue", inner, "gross");
   }
 
   function aiHtml(s) {
-    if (!s.ok) return section("AI usage & cost", failed(s));
+    if (!s.ok) return section("AI usage & cost", failed(s), "ai");
     var m = s.month, l = s.last30;
     var inner = '<div class="big">' + money(m.cost) + "<small>this month (est.)</small></div>";
     if (s.actuals && s.actuals.connected) {
       var cr = s.actuals.credits;
       inner += '<div class="note" style="margin-top:2px">Billed by Anthropic, last 30 days: <b>' +
         money(s.actuals.cost_30d) + "</b>" +
-        (cr ? " &nbsp;·&nbsp; Credits remaining ≈ <b>" + money(cr.remaining) + "</b>" : "") +
+        (cr ? ' &nbsp;·&nbsp; Credits remaining ≈ <b>' + money(cr.remaining) + "</b> <button class=\"i\" data-info=\"credits\" aria-label=\"Explain\" style=\"vertical-align:-5px\">i</button>" : "") +
         "</div>";
     }
     inner += spark(l.cost_by_day, "var(--warn)");
@@ -304,44 +485,11 @@
       inner += '<div class="note">Costs are in-house estimates from request_log. For billed actuals add ' +
         "<code>ANTHROPIC_ADMIN_KEY</code>.</div>";
     }
-    return section("AI usage & cost", inner);
-  }
-
-  function defectsHtml(s) {
-    if (!s.ok) return section("Defects & work", failed(s));
-    if (!s.connected) return section("Defects & work", missing("GitHub not connected", "GITHUB_TOKEN"));
-    var st = s.by_stage || {};
-    var inner = '<div class="big">' + num(s.open) + "<small>open issues</small></div>" +
-      '<div class="list">' + bars([
-        { l: "ready", n: st.ready || 0, c: "var(--warn)" },
-        { l: "planned", n: st.planned || 0 },
-        { l: "approved", n: st.approved || 0, c: "var(--good)" },
-        { l: "review", n: st.review || 0 },
-        { l: "changes-needed", n: st["changes-needed"] || 0, c: "var(--bad)" },
-        { l: "unlabelled", n: s.unstaged || 0 },
-      ]) + "</div>";
-    var sev = s.by_severity || {};
-    inner += '<div class="chips">' +
-      '<span class="chip' + (sev.critical ? " bad" : "") + '">' + num(sev.critical || 0) + " critical</span>" +
-      '<span class="chip' + (sev.high ? " warn" : "") + '">' + num(sev.high || 0) + " high</span>" +
-      '<span class="chip">' + num(sev.medium || 0) + " medium</span>" +
-      '<span class="chip">' + num(sev.low || 0) + " low</span></div>" +
-      '<div class="grid3">' +
-      kv("+" + num(s.created_7d), "new · 7d") + kv(num(s.closed_7d), "closed · 7d") +
-      kv(s.oldest_open_days != null ? num(s.oldest_open_days) + "d" : "—", "oldest open") + "</div>";
-    inner += '<div class="note">' + num(s.bugs) + " bugs · " + num(s.enhancements) +
-      " enhancements · " + num(s.testflight) + " from TestFlight feedback</div>";
-    if (s.recent && s.recent.length) {
-      inner += '<div class="list">' + s.recent.map(function (i) {
-        return '<div class="item"><div class="no">#' + i.number + '</div><div class="ti">' + esc(i.title) +
-          '</div><div class="tag">' + esc(i.stage || i.severity || "") + "</div></div>";
-      }).join("") + "</div>";
-    }
-    return section("Defects & work", inner);
+    return section("AI usage & cost", inner, "ai");
   }
 
   function appStoreHtml(s) {
-    if (!s.ok) return section("App Store", failed(s));
+    if (!s.ok) return section("App Store", failed(s), "appstore");
     var inner = "";
     var v = (s.versions || [])[0];
     if (v) {
@@ -370,13 +518,13 @@
           esc(r.territory || "") + "</div></div>";
       }).join("") + "</div>";
     } else if (s.connected) {
-      inner += '<div class="note">No customer reviews yet. TestFlight feedback auto-files into Defects (label: testflight).</div>';
+      inner += '<div class="note">No customer reviews yet. TestFlight feedback auto-files under Work (label: testflight).</div>';
     }
-    return section("App Store", inner);
+    return section("App Store", inner, "appstore");
   }
 
   function activityHtml(s) {
-    if (!s.ok) return section("Activity", failed(s));
+    if (!s.ok) return section("Activity", failed(s), "activity");
     var inner = '<div class="big">' + num(s.events_14d) + "<small>events · 14 days</small></div>" +
       spark(s.per_day_14d, "var(--good)");
     var t = s.by_type || {};
@@ -394,26 +542,160 @@
       })) + "</div>";
     }
     inner += '<div class="note">Anonymous gift events from all devices (signed-in or not).</div>';
-    return section("Activity", inner);
+    return section("Activity", inner, "activity");
   }
 
-  // ---- shell --------------------------------------------------------------
+  function workSummaryHtml(s) {
+    if (!s.ok) return section("Work", failed(s), "work");
+    if (!s.connected) return section("Work", missing("GitHub not connected", "GITHUB_TOKEN"), "work");
+    var c = s.by_category || {};
+    var st = s.by_stage || {};
+    var inner = '<div class="big">' + num(s.open) + "<small>open issues</small></div>" +
+      '<div class="chips">' +
+      '<span class="chip">' + num(c.bug || 0) + " bugs</span>" +
+      '<span class="chip">' + num(c.enhancement || 0) + " features</span>" +
+      '<span class="chip">' + num(c.marketing || 0) + " marketing</span>" +
+      '<span class="chip">' + num(c.other || 0) + " other</span></div>";
+    var attention = [];
+    if (st["changes-needed"]) attention.push('<span class="bad">' + num(st["changes-needed"]) + " need changes</span>");
+    if (st.review) attention.push('<span class="infoc">' + num(st.review) + " waiting for your testing</span>");
+    if (st.planned) attention.push(num(st.planned) + " plans awaiting approval");
+    if (attention.length) inner += '<div class="note">' + attention.join(" · ") + "</div>";
+    inner += '<div class="seg" style="margin-top:12px"><button data-goto="work">Open the Work tab →</button></div>';
+    return section("Work", inner, "work");
+  }
+
+  // ---- work page -----------------------------------------------------------
+
+  function workListHtml(s) {
+    var rows = (s.issues || []).filter(function (i) {
+      return workFilter === "all" || i.category === workFilter;
+    });
+    if (!rows.length) return '<div class="note">Nothing here right now.</div>';
+    return rows.map(function (i) {
+      var sm = STAGE_META[i.stage || "none"] || STAGE_META.none;
+      var sev = i.severity ? " · " + esc(i.severity) : "";
+      return '<a class="item" href="' + REPO_URL + i.number + '" target="_blank" rel="noopener">' +
+        '<span class="dot" style="background:' + sm.c + '"></span>' +
+        '<span class="no">#' + i.number + '</span><span class="ti">' + esc(i.title) +
+        '</span><span class="tag">' + esc(sm.l) + sev + " · " + num(i.age_days) + "d</span></a>";
+    }).join("");
+  }
+
+  function workPageHtml(s) {
+    if (!s.ok) return section("Work", failed(s), "work");
+    if (!s.connected) return section("Work", missing("GitHub not connected", "GITHUB_TOKEN"), "work");
+    var st = s.by_stage || {}, c = s.by_category || {}, sev = s.by_severity || {};
+    var html = '<div class="tiles">' +
+      tile(num(s.open), "Open", s.open, "num") +
+      tile("+" + num(s.created_7d), "New · 7d") +
+      tile(num(s.closed_7d), "Closed · 7d") + "</div>";
+
+    // Pipeline: how open work is distributed across the workflow stages.
+    var stages = ["ready", "planned", "approved", "review", "changes-needed", "none"];
+    var counts = stages.map(function (k) { return k === "none" ? (s.unstaged || 0) : (st[k] || 0); });
+    var total = counts.reduce(function (a, b) { return a + b; }, 0) || 1;
+    var bar = '<div class="split" style="height:8px">' + stages.map(function (k, i) {
+      if (!counts[i]) return "";
+      return '<i style="width:' + (counts[i] / total * 100) + "%;background:" + STAGE_META[k].c + '"></i>';
+    }).join("") + "</div>";
+    var legend = '<div class="chips">' + stages.map(function (k, i) {
+      if (!counts[i]) return "";
+      return '<span class="chip"><span style="color:' + STAGE_META[k].c + '">●</span> ' +
+        esc(STAGE_META[k].l) + " " + num(counts[i]) + "</span>";
+    }).join("") + "</div>";
+    var pipeline = bar + legend +
+      '<div class="chips">' +
+      '<span class="chip' + (sev.critical ? " bad" : "") + '">' + num(sev.critical || 0) + " critical</span>" +
+      '<span class="chip' + (sev.high ? " warn" : "") + '">' + num(sev.high || 0) + " high</span>" +
+      '<span class="chip">' + num(sev.medium || 0) + " medium</span>" +
+      '<span class="chip">' + num(sev.low || 0) + " low</span>" +
+      '<span class="chip">' + num(s.testflight || 0) + " from TestFlight</span></div>" +
+      '<div class="grid2">' +
+      kv(s.oldest_open_days != null ? num(s.oldest_open_days) + "d" : "—", "oldest open") +
+      kv(num(s.testflight), "testflight-sourced") + "</div>";
+    html += section("Pipeline", pipeline, "work");
+
+    var seg = '<div class="seg">' + CATS.map(function (cat) {
+      var n = cat.k === "all" ? s.open : (c[cat.k] || 0);
+      return '<button data-cat="' + cat.k + '"' + (workFilter === cat.k ? ' class="on"' : "") + ">" +
+        cat.l + " " + num(n) + "</button>";
+    }).join("") + "</div>";
+    html += section("All open issues",
+      seg + '<div class="list" id="worklist">' + workListHtml(s) + "</div>" +
+      '<div class="note">Tap an issue to open it on GitHub. Sorted by latest activity.</div>',
+      "categories");
+    return html;
+  }
+
+  // ---- shell ---------------------------------------------------------------
 
   function render(d) {
-    $("content").innerHTML =
+    lastData = d;
+    $("view-overview").innerHTML =
       heroHtml(d) +
+      testBannerHtml(d) +
       usersHtml(d.users || {}) +
       revenueHtml(d.revenue || {}) +
       aiHtml(d.ai || {}) +
-      defectsHtml(d.defects || {}) +
       appStoreHtml(d.appstore || {}) +
-      activityHtml(d.activity || {});
+      activityHtml(d.activity || {}) +
+      workSummaryHtml(d.work || {});
+    $("view-work").innerHTML = workPageHtml(d.work || {});
     var t = new Date(d.generated_at);
-    $("updated").textContent = "updated " + t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    $("updated").textContent = "mission control · updated " +
+      t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    countUps();
+    if (!document.body.classList.contains("booted")) {
+      setTimeout(function () { document.body.classList.add("booted"); }, 1200);
+    }
+  }
+
+  function countUps() {
+    if (document.body.classList.contains("booted")) return;
+    var els = document.querySelectorAll("[data-cu]");
+    Array.prototype.forEach.call(els, function (el) {
+      var target = parseFloat(el.getAttribute("data-cu"));
+      if (!isFinite(target) || target <= 0) return;
+      var isMoney = el.getAttribute("data-fmt") === "money";
+      var fmt = function (v) { return isMoney ? money(v) : num(Math.round(v)); };
+      var final = el.textContent;
+      var t0 = null;
+      var step = function (ts) {
+        if (t0 === null) t0 = ts;
+        var p = Math.min(1, (ts - t0) / 600);
+        var eased = 1 - (1 - p) * (1 - p);
+        el.textContent = p < 1 ? fmt(target * eased) : final;
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+  }
+
+  function showView(name) {
+    ["overview", "work"].forEach(function (v) {
+      $("view-" + v).classList.toggle("on", v === name);
+      $("tab-" + v).classList.toggle("on", v === name);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function openSheet(id) {
+    var info = INFO[id];
+    if (!info) return;
+    $("sheetTitle").textContent = info.t;
+    $("sheetBody").innerHTML = info.b;
+    $("dim").classList.add("on");
+    $("sheet").classList.add("on");
+  }
+  function closeSheet() {
+    $("dim").classList.remove("on");
+    $("sheet").classList.remove("on");
   }
 
   function showLogin(msg) {
     $("app").classList.add("hidden");
+    $("tabs").classList.add("hidden");
     $("login").classList.remove("hidden");
     $("loginerr").textContent = msg || "";
     $("key").focus();
@@ -424,6 +706,7 @@
     if (!key) { showLogin(); return; }
     $("login").classList.add("hidden");
     $("app").classList.remove("hidden");
+    $("tabs").classList.remove("hidden");
     $("refresh").classList.add("busy");
     fetch(BASE + "/data" + (fresh ? "?fresh=1" : ""), { headers: { "x-dashboard-key": key } })
       .then(function (r) {
@@ -440,6 +723,30 @@
       .finally(function () { $("refresh").classList.remove("busy"); });
   }
 
+  // ---- events --------------------------------------------------------------
+
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest ? e.target.closest("[data-info],[data-cat],[data-goto],#testtoggle") : null;
+    if (!el) return;
+    if (el.hasAttribute("data-info")) { e.preventDefault(); openSheet(el.getAttribute("data-info")); return; }
+    if (el.hasAttribute("data-goto")) { showView(el.getAttribute("data-goto")); return; }
+    if (el.id === "testtoggle") {
+      showTest = !showTest;
+      localStorage.setItem(LS_TEST, showTest ? "1" : "0");
+      if (lastData) render(lastData);
+      return;
+    }
+    if (el.hasAttribute("data-cat")) {
+      workFilter = el.getAttribute("data-cat");
+      var seg = el.parentNode;
+      Array.prototype.forEach.call(seg.children, function (b) { b.classList.toggle("on", b === el); });
+      var list = $("worklist");
+      if (list && lastData) list.innerHTML = workListHtml(lastData.work || {});
+    }
+  });
+  $("dim").addEventListener("click", closeSheet);
+  $("tab-overview").addEventListener("click", function () { showView("overview"); });
+  $("tab-work").addEventListener("click", function () { showView("work"); });
   $("unlock").addEventListener("click", function () {
     var k = $("key").value.trim();
     if (!k) return;
