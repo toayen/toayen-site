@@ -190,6 +190,16 @@
             cursor: default;
         }
 
+        .btn-secondary {
+            background: white;
+            border: 1px solid #EEEEEC;
+            color: #1A1A1A;
+        }
+
+        .btn-secondary:hover {
+            border-color: #C0C0C0;
+        }
+
         .btn-note {
             text-align: center;
             font-size: 13px;
@@ -298,6 +308,12 @@
                 color: #444;
             }
 
+            .btn-secondary {
+                background: #1A1A1A;
+                border-color: #2A2A2A;
+                color: #F0F0F0;
+            }
+
             .btn-note {
                 color: #666;
             }
@@ -358,9 +374,10 @@
 
         <div id="actions" class="actions" hidden>
             <a id="open-app" class="btn btn-primary" href="#">Open in Toayen</a>
-            <span class="btn btn-disabled">Get Toayen &middot; Coming soon to the App Store</span>
-            <!-- At App Store launch, replace the disabled span above with:
-                 <a class="btn btn-primary" href="APP_STORE_URL_HERE">Get Toayen on the App Store</a> -->
+            <!-- Live since 1.0 shipped on 4 August. Secondary, not primary:
+                 the card is what the visitor came for and the download is the
+                 quiet second thing (#373). -->
+            <a class="btn btn-secondary" href="https://apps.apple.com/app/id6788513717">Get Toayen on the App Store</a>
             <p class="btn-note">Already have Toayen? "Open in Toayen" adds these details in one tap.</p>
         </div>
 
