@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
+    <!-- The unseal key rides in the URL path, so the Referer header would
+         hand it to any site this page links out to (the shop link, #276).
+         No outbound request carries the address of this page. -->
+    <meta name="referrer" content="no-referrer">
     <title>A Toayen Card</title>
     <!--
         GitHub Pages serves this file for any path without its own page,
@@ -99,6 +103,15 @@
             letter-spacing: 1.5px;
             line-height: 1.3;
             overflow-wrap: break-word;
+        }
+
+        /* Sent gift idea (#276): the photo rides inside the sealed payload
+           and renders as a data URI, so it sits flush at the top of the card. */
+        .gift-photo {
+            display: block;
+            width: 100%;
+            max-height: 320px;
+            object-fit: cover;
         }
 
         .card-subtitle {
@@ -390,6 +403,24 @@
             </div>
         </div>
 
+        <!-- Sent gift idea (#276): the same sealed links, second kind. -->
+        <div id="gift" class="card" hidden>
+            <img id="gift-photo" class="gift-photo" alt="" hidden>
+            <div class="card-header">
+                <div id="gift-avatar" class="avatar" aria-hidden="true"></div>
+                <h1 id="gift-title" class="card-name"></h1>
+                <p id="gift-subtitle" class="card-subtitle" hidden></p>
+            </div>
+            <div id="gift-details" class="card-section" hidden></div>
+        </div>
+
+        <div id="gift-actions" class="actions" hidden>
+            <a id="gift-shop" class="btn btn-primary" href="#" rel="noopener noreferrer" hidden>View the gift</a>
+            <a id="gift-open-app" class="btn btn-secondary" href="#">Add it in Toayen</a>
+            <a class="btn btn-secondary" href="https://apps.apple.com/app/id6788513717">Get Toayen on the App Store</a>
+            <p class="btn-note">Toayen keeps gift ideas, budgets and reminders for everyone you buy for.</p>
+        </div>
+
         <div id="expired" class="empty" hidden>
             <h1>This card link has expired</h1>
             <p>Card links last 90 days. Ask the sender to share a fresh one from Toayen, it only takes two taps.</p>
@@ -536,7 +567,13 @@
                     var payload = null;
                     try { payload = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(plain))); } catch (e) {}
                     if (!payload) { fail('broken'); return; }
-                    render(payload, new Uint8Array(plain));
+                    // Second payload kind (#276): a sent gift idea. Person
+                    // card JSON has no `kind`, so this can never misroute.
+                    if (payload.kind === 'gift') {
+                        renderGift(payload, new Uint8Array(plain));
+                    } else {
+                        render(payload, new Uint8Array(plain));
+                    }
                 })
                 .catch(function () { fail('broken'); });
         }).catch(function () { fail('broken'); });
@@ -643,6 +680,72 @@
             show('card');
             show('actions');
             document.title = name + "'s Toayen Card";
+        }
+
+        // A sent gift idea (#276). Same discipline as render(): every field
+        // is untrusted input even after it decrypts cleanly — textContent
+        // only, the photo embeds as a checked data URI, and only plain web
+        // URLs ever become a tappable button.
+        function renderGift(payload, plainBytes) {
+            if (typeof payload.title !== 'string' || !payload.title.trim()) { fail('broken'); return; }
+            var title = payload.title.trim().slice(0, 100);
+
+            var hasPhoto = typeof payload.photo === 'string' &&
+                payload.photo.length > 0 && payload.photo.length <= 48000 &&
+                /^[A-Za-z0-9+/]+={0,2}$/.test(payload.photo);
+            if (hasPhoto) {
+                var img = document.getElementById('gift-photo');
+                img.src = 'data:image/jpeg;base64,' + payload.photo;
+                img.hidden = false;
+                document.getElementById('gift-avatar').hidden = true;
+            } else {
+                document.getElementById('gift-avatar').textContent = title.charAt(0).toUpperCase();
+            }
+
+            document.getElementById('gift-title').textContent = title;
+
+            if (typeof payload.senderName === 'string' && payload.senderName.trim()) {
+                var subtitle = document.getElementById('gift-subtitle');
+                subtitle.textContent = 'Sent by ' + payload.senderName.trim().slice(0, 100);
+                subtitle.hidden = false;
+            }
+
+            var details = document.getElementById('gift-details');
+            var price = payload.estimatedPrice;
+            if (typeof price === 'number' && isFinite(price) && price > 0 && price < 1000000) {
+                var priceText = String(Math.round(price * 100) / 100);
+                if (typeof payload.currency === 'string' && /^[A-Z]{3}$/.test(payload.currency)) {
+                    try {
+                        priceText = new Intl.NumberFormat(undefined, { style: 'currency', currency: payload.currency }).format(price);
+                    } catch (e) { priceText = payload.currency + ' ' + priceText; }
+                }
+                details.appendChild(detailRow('Around', priceText));
+                details.hidden = false;
+            }
+            if (typeof payload.retailer === 'string' && payload.retailer.trim()) {
+                details.appendChild(detailRow('Retailer', payload.retailer.trim().slice(0, 50)));
+                details.hidden = false;
+            }
+            if (typeof payload.recipientName === 'string' && payload.recipientName.trim()) {
+                details.appendChild(detailRow('For', payload.recipientName.trim().slice(0, 100)));
+                details.hidden = false;
+            }
+
+            if (typeof payload.productURL === 'string' &&
+                payload.productURL.length <= 2000 &&
+                /^https?:\/\//i.test(payload.productURL)) {
+                var shop = document.getElementById('gift-shop');
+                shop.href = payload.productURL;
+                shop.hidden = false;
+            }
+
+            document.getElementById('gift-open-app').href =
+                'toayen://import?data=' + encodeURIComponent(bytesToB64url(plainBytes));
+
+            hide('loading');
+            show('gift');
+            show('gift-actions');
+            document.title = title + ' · a gift idea on Toayen';
         }
     })();
     </script>
