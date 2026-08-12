@@ -550,6 +550,23 @@
             </div>
         </div>
 
+        <!-- Secret Santa assignment (#483): the only reveal there is. -->
+        <div id="santa" class="card" hidden>
+            <button id="santa-sealed" class="wish-sealed" type="button">
+                <span class="wish-ring" aria-hidden="true">?</span>
+                <h1 id="santa-for" class="card-name"></h1>
+                <p class="card-subtitle">Tap to see who you're gifting</p>
+            </button>
+            <div id="santa-open" class="wish-open" hidden>
+                <p class="card-subtitle">You have</p>
+                <h1 id="santa-name" class="card-name"></h1>
+                <p id="santa-budget" class="wish-from" hidden></p>
+                <p id="santa-likes" class="wish-from" hidden></p>
+                <p class="wish-from">Keep it to yourself. That's the game.</p>
+                <p class="wish-sent-with">Drawn with <a href="https://toayen.co.uk">Toayen</a></p>
+            </div>
+        </div>
+
         <div id="expired" class="empty" hidden>
             <h1>This card link has expired</h1>
             <p>Card links last 90 days. Ask the sender to share a fresh one from Toayen, it only takes two taps.</p>
@@ -702,6 +719,8 @@
                         renderGift(payload, new Uint8Array(plain));
                     } else if (payload.kind === 'birthdayCard') {
                         renderWish(payload);
+                    } else if (payload.kind === 'secretSanta') {
+                        renderSanta(payload);
                     } else {
                         render(payload, new Uint8Array(plain));
                     }
@@ -929,6 +948,62 @@
             hide('loading');
             show('wish');
             document.title = 'A birthday card for ' + forName;
+        }
+
+        // A Secret Santa assignment (#483). The name exists on screen only
+        // after the tap; the sealed face says whose link it is so a
+        // misdirected link is obvious before it gives anything away.
+        function renderSanta(payload) {
+            if (typeof payload.playerName !== 'string' || !payload.playerName.trim() ||
+                typeof payload.assigneeName !== 'string' || !payload.assigneeName.trim()) {
+                fail('broken');
+                return;
+            }
+            var player = payload.playerName.trim().slice(0, 100);
+            var assignee = payload.assigneeName.trim().slice(0, 100);
+            var occasion = (typeof payload.occasionName === 'string' && payload.occasionName.trim())
+                ? ' for ' + payload.occasionName.trim().slice(0, 100) : '';
+
+            document.getElementById('santa-for').textContent =
+                player + ', your Secret Santa draw' + occasion;
+            document.getElementById('santa-name').textContent = assignee;
+
+            var budget = payload.budget;
+            if (typeof budget === 'number' && isFinite(budget) && budget > 0 && budget < 1000000) {
+                var text = String(Math.round(budget * 100) / 100);
+                if (typeof payload.currency === 'string' && /^[A-Z]{3}$/.test(payload.currency)) {
+                    try {
+                        text = new Intl.NumberFormat(undefined, { style: 'currency', currency: payload.currency }).format(budget);
+                    } catch (e) { text = payload.currency + ' ' + text; }
+                }
+                var budgetLine = document.getElementById('santa-budget');
+                budgetLine.textContent = 'Spending cap ' + text;
+                budgetLine.hidden = false;
+            }
+
+            if (Array.isArray(payload.assigneeLikes)) {
+                var likes = [];
+                for (var i = 0; i < payload.assigneeLikes.length && likes.length < 8; i++) {
+                    if (typeof payload.assigneeLikes[i] === 'string' && payload.assigneeLikes[i].trim()) {
+                        likes.push(payload.assigneeLikes[i].trim().slice(0, 50).toLowerCase());
+                    }
+                }
+                if (likes.length) {
+                    var likesLine = document.getElementById('santa-likes');
+                    likesLine.textContent = 'They like ' + likes.join(', ');
+                    likesLine.hidden = false;
+                }
+            }
+
+            var sealed = document.getElementById('santa-sealed');
+            sealed.addEventListener('click', function () {
+                sealed.hidden = true;
+                show('santa-open');
+            }, { once: true });
+
+            hide('loading');
+            show('santa');
+            document.title = 'Your Secret Santa draw';
         }
     })();
     </script>
