@@ -572,6 +572,13 @@
             <p>Card links last 90 days. Ask the sender to share a fresh one from Toayen, it only takes two taps.</p>
         </div>
 
+        <!-- A link its sender deliberately retired (#483): most often a
+             Secret Santa redraw handing out fresh links. -->
+        <div id="revoked" class="empty" hidden>
+            <h1>This link was replaced</h1>
+            <p>The sender retired it, usually because a fresh one is on its way. Ask them for their newest link.</p>
+        </div>
+
         <div id="broken" class="empty" hidden>
             <h1>This card link looks incomplete</h1>
             <p>Part of the link seems to have been lost along the way. Ask the sender to share their card again from Toayen.</p>
@@ -693,7 +700,8 @@
             return res.json().then(function (body) { return { status: res.status, body: body }; });
         }).then(function (result) {
             if (result.status !== 200 || !result.body || typeof result.body.ciphertext !== 'string') {
-                fail(result.body && result.body.error === 'expired' ? 'expired' : 'broken');
+                var reason = result.body && result.body.error;
+                fail(reason === 'expired' ? 'expired' : reason === 'revoked' ? 'revoked' : 'broken');
                 return;
             }
             var combined;
