@@ -223,56 +223,196 @@
             to { opacity: 1; transform: none; }
         }
 
-        /* Confetti that owns the screen (#314 round 2): the whole viewport,
-           gold-led, tumbling and swaying for seconds — not a flicker inside
-           the card. Three nested elements so fall, sway and tumble each get
-           their own transform. */
-        .wish-confetti-layer {
+        /* Round 3 (#314): the dark stage the candle and firework reveals
+           play on. It owns the whole screen; the message ends up glowing
+           out of it, light on a dark ground like the Toayen mark. */
+        .stage {
             position: fixed;
             inset: 0;
+            background: #0B0B0B;
+            z-index: 4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.6s cubic-bezier(.2, .7, .3, 1);
+        }
+
+        .stage.lit { opacity: 1; }
+
+        .stage-inner {
+            width: 100%;
+            max-width: 430px;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .stage canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
-            overflow: hidden;
-            z-index: 5;
         }
 
-        .wish-confetti {
+        .stage-hint {
+            font-size: 13px;
+            color: #8E8E8E;
+            margin-bottom: 26px;
+            transition: opacity 0.4s;
+        }
+
+        .wish-skip {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 34px;
+            text-align: center;
+            font-size: 13px;
+            color: #8E8E8E;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 6;
+        }
+
+        .wish-skip.shown { opacity: 1; }
+
+        /* Candles: a flame of layered gradients breathing on detuned
+           rhythms above either a numeral (milestones render the age
+           itself) or a slim stick. */
+        .candle-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .candle {
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .flame {
+            position: relative;
+            display: block;
+            width: 44px;
+            height: 54px;
+            margin: 0 auto 2px;
+        }
+
+        .flame span {
             position: absolute;
-            top: -8vh;
-            animation: wish-fall linear forwards;
+            left: 50%;
+            border-radius: 50%;
         }
 
-        .wish-confetti-sway {
+        .flame-glow {
+            width: 40px;
+            height: 48px;
+            bottom: -6px;
+            margin-left: -20px;
+            background: radial-gradient(ellipse at center, rgba(201, 169, 106, 0.4), rgba(201, 169, 106, 0));
+            animation: flame-breathe ease-in-out infinite alternate;
+        }
+
+        .flame-outer {
+            width: 12px;
+            height: 26px;
+            bottom: 4px;
+            margin-left: -6px;
+            border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+            background: #E8B75A;
+            opacity: 0.85;
+            animation: flame-sway ease-in-out infinite alternate;
+        }
+
+        .flame-core {
+            width: 6px;
+            height: 15px;
+            bottom: 6px;
+            margin-left: -3px;
+            border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+            background: #FFF3D6;
+            animation: flame-sway ease-in-out infinite alternate;
+        }
+
+        @keyframes flame-sway {
+            from { transform: translateX(-1.6px) scaleY(0.96); }
+            to { transform: translateX(1.6px) scaleY(1.06); }
+        }
+
+        @keyframes flame-breathe {
+            from { opacity: 0.75; }
+            to { opacity: 1; }
+        }
+
+        .candle-digit {
             display: block;
-            animation: wish-sway ease-in-out infinite alternate;
+            font-weight: 200;
+            font-size: 92px;
+            line-height: 1;
+            color: #C9A96A;
+            transition: color 0.6s;
         }
 
-        .wish-confetti-piece {
+        .candle-stick {
             display: block;
-            border-radius: 2px;
-            animation: wish-tumble linear infinite;
+            width: 7px;
+            height: 62px;
+            margin: 0 auto;
+            border-radius: 4px;
+            background: #E8DFCB;
+            transition: background 0.6s;
         }
 
-        @keyframes wish-fall {
-            0% { transform: translateY(0); opacity: 0; }
-            5% { opacity: 0.95; }
-            85% { opacity: 0.95; }
-            100% { transform: translateY(120vh); opacity: 0; }
+        .candle.out .flame span { animation: none; opacity: 0; transition: opacity 0.22s; }
+        .candle.out .candle-digit { color: #4A4436; }
+        .candle.out .candle-stick { background: #4A4436; }
+
+        .smoke {
+            position: absolute;
+            left: 50%;
+            bottom: 10px;
+            width: 5px;
+            height: 14px;
+            margin-left: -2.5px;
+            border-radius: 50%;
+            background: #9A9A96;
+            opacity: 0;
+            animation: smoke-rise 1.5s ease-out forwards;
         }
 
-        @keyframes wish-sway {
-            from { transform: translateX(-16px); }
-            to { transform: translateX(16px); }
+        @keyframes smoke-rise {
+            0% { opacity: 0.35; transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-18px) translateX(4px); }
+            100% { opacity: 0; transform: translateY(-36px) translateX(-3px); }
         }
 
-        @keyframes wish-tumble {
-            from { transform: rotate3d(1, 0.6, 0.2, 0deg); }
-            to { transform: rotate3d(1, 0.6, 0.2, 360deg); }
+        /* The message on the dark stage: light type, a soft gold bloom. */
+        .stage .wish-open { padding: 0; }
+        .stage .wish-open .wish-message {
+            color: #F0EDE6;
+            text-shadow: 0 0 18px rgba(201, 169, 106, 0.35);
+        }
+        .stage .wish-open .wish-from { color: #9A927F; }
+        .stage .wish-open .wish-sent-with { color: #6E685C; }
+        .stage .wish-open .wish-sent-with a { color: #6E685C; border-bottom-color: #3A362C; }
+
+        /* Confetti: while held, the sealed card draws tight and shimmers. */
+        .wish-sealed.holding {
+            transform: scale(0.96);
+            box-shadow: 0 0 0 2px #C9A96A inset;
+            transition: transform 0.25s, box-shadow 0.25s;
         }
 
         @media (prefers-reduced-motion: reduce) {
             .wish-sealed.opening { animation: none; display: none; }
             .wish-open > * { animation: none; }
-            .wish-confetti-layer { display: none; }
+            .stage, .wish-skip { display: none !important; }
         }
 
         .card-subtitle {
@@ -608,7 +748,7 @@
             <button id="wish-sealed" class="wish-sealed" type="button">
                 <span id="wish-ring" class="wish-ring" aria-hidden="true"></span>
                 <h1 id="wish-for" class="card-name"></h1>
-                <p class="card-subtitle">Tap to open</p>
+                <p id="wish-hint" class="card-subtitle">Tap to open</p>
             </button>
             <div id="wish-open" class="wish-open" hidden>
                 <p id="wish-milestone" class="wish-milestone" hidden></p>
@@ -617,6 +757,16 @@
                 <p class="wish-sent-with">Sent with <a href="https://toayen.co.uk">Toayen</a></p>
             </div>
         </div>
+
+        <!-- Round 3 (#314): the dark stage the candle and firework reveals
+             play on. The message ends up here, glowing out of the dark. -->
+        <div id="stage" class="stage" hidden>
+            <div class="stage-inner">
+                <p id="stage-hint" class="stage-hint"></p>
+                <div id="candle-row" class="candle-row" hidden></div>
+            </div>
+        </div>
+        <p id="wish-skip" class="wish-skip" hidden>Skip to the message</p>
 
         <!-- Secret Santa assignment (#483): the only reveal there is. -->
         <div id="santa" class="card card-reveal" hidden>
@@ -1001,11 +1151,41 @@
                 from.hidden = false;
             }
 
+            // Round 3 (#314): three reveal styles, chosen by the sender.
+            var style = (payload.theme === 'candlelight' || payload.theme === 'fireworks')
+                ? payload.theme : 'confetti';
+            var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             var sealed = document.getElementById('wish-sealed');
-            sealed.addEventListener('click', function () {
-                openReveal(sealed, 'wish-open');
-                dropConfetti();
-            }, { once: true });
+
+            if (reduced) {
+                document.getElementById('wish-hint').textContent = 'Tap to open';
+                sealed.addEventListener('click', function () {
+                    openReveal(sealed, 'wish-open');
+                }, { once: true });
+            } else if (style === 'confetti') {
+                // Held, then released: the card draws tight while you hold
+                // and the burst fires when you let go.
+                document.getElementById('wish-hint').textContent = 'Hold, then let go';
+                var fired = false;
+                sealed.addEventListener('pointerdown', function () {
+                    if (!fired) { sealed.classList.add('holding'); }
+                });
+                sealed.addEventListener('pointerup', function () {
+                    if (fired) { return; }
+                    fired = true;
+                    sealed.classList.remove('holding');
+                    openReveal(sealed, 'wish-open');
+                    cannonBurst();
+                });
+                sealed.addEventListener('pointerleave', function () {
+                    sealed.classList.remove('holding');
+                });
+            } else {
+                document.getElementById('wish-hint').textContent = 'Tap to open';
+                sealed.addEventListener('click', function () {
+                    openStage(sealed, style, payload);
+                }, { once: true });
+            }
 
             hide('loading');
             show('wish');
@@ -1084,42 +1264,262 @@
             window.setTimeout(function () { sealedButton.hidden = true; }, 900);
         }
 
-        // Confetti across the whole viewport: gold-led, tumbling and
-        // swaying for seconds. The bar is simple — nobody should need to
-        // be asked whether they saw it.
-        function dropConfetti() {
-            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
-            var layer = document.createElement('div');
-            layer.className = 'wish-confetti-layer';
-            var colours = ['#C9A96A', '#B08D57', '#8A6A3E', '#C9A96A', '#B8B8B4'];
-            for (var i = 0; i < 40; i++) {
-                var fall = document.createElement('span');
-                fall.className = 'wish-confetti';
-                fall.style.left = (2 + Math.random() * 96) + '%';
-                fall.style.animationDuration = (3.1 + Math.random() * 1.6) + 's';
-                fall.style.animationDelay = (Math.random() * 1.6) + 's';
+        // ---- Round 3 (#314): the canvas particle engine ------------------
+        // One tiny rAF engine drives both the confetti cannon and the
+        // fireworks: rectangles with velocity, gravity, spin and fade.
 
-                var sway = document.createElement('span');
-                sway.className = 'wish-confetti-sway';
-                sway.style.animationDuration = (1.1 + Math.random() * 0.7) + 's';
-                sway.style.animationDelay = (Math.random() * 0.6) + 's';
+        var engineCanvas = null, engineCtx = null, particles = [], rockets = [], engineRunning = false;
 
-                var piece = document.createElement('span');
-                piece.className = 'wish-confetti-piece';
-                var size = 8 + Math.random() * 7;
-                piece.style.width = size + 'px';
-                piece.style.height = (size * (0.55 + Math.random() * 0.5)) + 'px';
-                piece.style.background = colours[i % colours.length];
-                piece.style.animationDuration = (0.9 + Math.random() * 0.8) + 's';
-
-                sway.appendChild(piece);
-                fall.appendChild(sway);
-                layer.appendChild(fall);
-            }
-            document.body.appendChild(layer);
-            // The longest piece is done by ~6.5s; the layer goes with it.
-            window.setTimeout(function () { layer.remove(); }, 7000);
+        function ensureEngine() {
+            if (engineCanvas) { return; }
+            engineCanvas = document.createElement('canvas');
+            engineCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:7;';
+            document.body.appendChild(engineCanvas);
+            engineCtx = engineCanvas.getContext('2d');
         }
+
+        function engineTick() {
+            var w = engineCanvas.width = engineCanvas.clientWidth * (window.devicePixelRatio || 1);
+            var h = engineCanvas.height = engineCanvas.clientHeight * (window.devicePixelRatio || 1);
+            var dpr = window.devicePixelRatio || 1;
+            engineCtx.clearRect(0, 0, w, h);
+            engineCtx.save();
+            engineCtx.scale(dpr, dpr);
+            var now = performance.now() / 1000;
+            var alive = false;
+
+            for (var r = rockets.length - 1; r >= 0; r--) {
+                var rk = rockets[r];
+                var rt = now - rk.start;
+                if (rt < 0) { alive = true; continue; }
+                if (rt >= rk.riseTime) {
+                    burstAt(rk.x, rk.burstY, rk.palette);
+                    rockets.splice(r, 1);
+                    alive = true;
+                    continue;
+                }
+                var eased = 1 - Math.pow(1 - rt / rk.riseTime, 2);
+                var y = rk.fromY - (rk.fromY - rk.burstY) * eased;
+                engineCtx.globalAlpha = 0.9;
+                engineCtx.fillStyle = '#FFF3D6';
+                engineCtx.fillRect(rk.x - 1.5, y - 1.5, 3, 3);
+                engineCtx.globalAlpha = 0.3;
+                engineCtx.fillStyle = '#C9A96A';
+                engineCtx.fillRect(rk.x - 0.5, y, 1, 26);
+                alive = true;
+            }
+
+            for (var i = particles.length - 1; i >= 0; i--) {
+                var pt = particles[i];
+                var t = now - pt.start;
+                if (t < 0) { alive = true; continue; }
+                if (t > pt.life) { particles.splice(i, 1); continue; }
+                var x = pt.x + pt.vx * t;
+                var y = pt.y + pt.vy * t + pt.gravity * t * t;
+                var fade = t < 0.08 ? t / 0.08 : Math.max(0, 1 - (t - pt.life * 0.6) / (pt.life * 0.4));
+                engineCtx.save();
+                engineCtx.translate(x, y);
+                engineCtx.rotate(t * pt.spin);
+                engineCtx.globalAlpha = 0.95 * Math.max(0, Math.min(1, fade));
+                engineCtx.fillStyle = pt.colour;
+                if (pt.rect) {
+                    var squish = Math.max(0.15, Math.abs(Math.cos(t * pt.tumble)));
+                    engineCtx.fillRect(-pt.size / 2, -pt.size * 0.35 * squish, pt.size, pt.size * 0.7 * squish);
+                } else {
+                    engineCtx.beginPath();
+                    engineCtx.arc(0, 0, pt.size, 0, Math.PI * 2);
+                    engineCtx.fill();
+                }
+                engineCtx.restore();
+                alive = true;
+            }
+
+            engineCtx.restore();
+            if (alive) { requestAnimationFrame(engineTick); } else { engineRunning = false; }
+        }
+
+        function engineKick() {
+            if (!engineRunning) { engineRunning = true; requestAnimationFrame(engineTick); }
+        }
+
+        var GOLDS = ['#C9A96A', '#B08D57', '#8A6A3E', '#E8B75A', '#B8B8B4'];
+
+        // The confetti cannon: pieces fan up from mid-screen and arc over.
+        function cannonBurst() {
+            ensureEngine();
+            var now = performance.now() / 1000;
+            var w = engineCanvas.clientWidth, h = engineCanvas.clientHeight;
+            for (var i = 0; i < 44; i++) {
+                var angle = -Math.PI / 2 + (Math.random() * 1.7 - 0.85);
+                var speed = 320 + Math.random() * 240;
+                particles.push({
+                    x: w / 2, y: h * 0.55,
+                    vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+                    gravity: 180, spin: 4 + Math.random() * 5, tumble: 6 + Math.random() * 5,
+                    size: 8 + Math.random() * 7, life: 4.2, rect: true,
+                    colour: GOLDS[i % GOLDS.length], start: now + Math.random() * 0.12
+                });
+            }
+            engineKick();
+        }
+
+        // A firework burst: three dozen embers pulled down gently as they fade.
+        function burstAt(x, y, palette) {
+            var now = performance.now() / 1000;
+            for (var i = 0; i < 36; i++) {
+                var angle = (i / 36) * Math.PI * 2 + Math.random() * 0.2;
+                var speed = 60 + ((i * 37) % 40);
+                particles.push({
+                    x: x, y: y,
+                    vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+                    gravity: 55, spin: 0, tumble: 1,
+                    size: i % 5 === 0 ? 2.4 : 1.6, life: 1.7, rect: false,
+                    colour: palette[i % palette.length], start: now
+                });
+            }
+            engineKick();
+        }
+
+        var SKY_PALETTES = [
+            ['#E8B75A', '#C9A96A', '#FFF3D6'],
+            ['#C9A96A', '#B8B8B4', '#E8B75A'],
+            ['#FFF3D6', '#C9A96A', '#8A6A3E']
+        ];
+        var skyShots = 0;
+
+        function launchRocket(xFrac, yFrac) {
+            ensureEngine();
+            var w = engineCanvas.clientWidth, h = engineCanvas.clientHeight;
+            rockets.push({
+                x: w * xFrac, fromY: h, burstY: h * Math.max(0.12, Math.min(0.55, yFrac)),
+                riseTime: 0.7, start: performance.now() / 1000,
+                palette: SKY_PALETTES[skyShots++ % SKY_PALETTES.length]
+            });
+            engineKick();
+        }
+
+        // ---- The dark stage for candlelight and fireworks ----------------
+
+        function openStage(sealedButton, style, payload) {
+            sealedButton.classList.add('opening');
+            sealedButton.disabled = true;
+            window.setTimeout(function () {
+                document.getElementById('wish').hidden = true;
+            }, 880);
+
+            var stage = document.getElementById('stage');
+            stage.hidden = false;
+            window.requestAnimationFrame(function () { stage.classList.add('lit'); });
+
+            var skip = document.getElementById('wish-skip');
+            window.setTimeout(function () {
+                skip.hidden = false;
+                window.requestAnimationFrame(function () { skip.classList.add('shown'); });
+            }, 4000);
+            skip.addEventListener('click', function () { stageMessage(); }, { once: true });
+
+            if (style === 'candlelight') { candleScene(payload); }
+            else { fireworksScene(); }
+        }
+
+        var stageDone = false;
+
+        function stageMessage() {
+            if (stageDone) { return; }
+            stageDone = true;
+            var skip = document.getElementById('wish-skip');
+            skip.classList.remove('shown');
+            window.setTimeout(function () { skip.hidden = true; }, 400);
+            document.getElementById('stage-hint').style.opacity = '0';
+            var candles = document.getElementById('candle-row');
+            candles.style.transition = 'opacity 0.6s';
+            candles.style.opacity = '0';
+            window.setTimeout(function () {
+                candles.hidden = true;
+                // The message moves onto the stage and glows out of the dark.
+                var open = document.getElementById('wish-open');
+                document.querySelector('.stage-inner').appendChild(open);
+                open.hidden = false;
+            }, 650);
+        }
+
+        function candleScene(payload) {
+            document.getElementById('stage-hint').textContent = 'Put the candles out';
+            var row = document.getElementById('candle-row');
+            row.hidden = false;
+
+            var digits = [];
+            if (typeof payload.milestone === 'string') {
+                var m = payload.milestone.match(/^\d+/);
+                if (m) { digits = m[0].split(''); }
+            }
+            var count = digits.length || 5;
+            var remaining = count;
+
+            for (var i = 0; i < count; i++) {
+                var candle = document.createElement('button');
+                candle.type = 'button';
+                candle.className = 'candle';
+                candle.setAttribute('aria-label', 'Lit candle. Puts this candle out.');
+
+                var flame = document.createElement('span');
+                flame.className = 'flame';
+                ['flame-glow', 'flame-outer', 'flame-core'].forEach(function (cls) {
+                    var part = document.createElement('span');
+                    part.className = cls;
+                    part.style.animationDuration = (0.28 + Math.random() * 0.22) + 's';
+                    part.style.animationDelay = (Math.random() * 0.3) + 's';
+                    flame.appendChild(part);
+                });
+                candle.appendChild(flame);
+
+                var body = document.createElement('span');
+                if (digits.length) {
+                    body.className = 'candle-digit';
+                    body.textContent = digits[i];
+                } else {
+                    body.className = 'candle-stick';
+                }
+                candle.appendChild(body);
+
+                candle.addEventListener('click', function () {
+                    if (this.classList.contains('out')) { return; }
+                    this.classList.add('out');
+                    var smoke = document.createElement('span');
+                    smoke.className = 'smoke';
+                    this.querySelector('.flame').appendChild(smoke);
+                    remaining--;
+                    if (remaining === 0) {
+                        // The dark beat after the last flame, then the words.
+                        window.setTimeout(stageMessage, 700);
+                    }
+                });
+                row.appendChild(candle);
+            }
+        }
+
+        function fireworksScene() {
+            document.getElementById('stage-hint').textContent = 'Tap the sky';
+            var stage = document.getElementById('stage');
+            stage.addEventListener('pointerdown', function (event) {
+                if (stageDone && event.target.closest('a')) { return; }
+                launchRocket(event.clientX / window.innerWidth,
+                             event.clientY / window.innerHeight);
+                document.getElementById('stage-hint').style.opacity = '0.35';
+            });
+            // A few launch themselves so the sky is never empty, then the
+            // message takes over. Taps keep working right through.
+            var auto = [800, 2200, 3600];
+            auto.forEach(function (ms) {
+                window.setTimeout(function () {
+                    if (!stageDone) {
+                        launchRocket(0.25 + Math.random() * 0.5, 0.2 + Math.random() * 0.25);
+                    }
+                }, ms);
+            });
+            window.setTimeout(stageMessage, 5800);
+        }
+
     })();
     </script>
 </body>
