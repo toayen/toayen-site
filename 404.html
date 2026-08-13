@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
+    <!-- The unseal key rides in the URL path, so the Referer header would
+         hand it to any site this page links out to (the shop link, #276).
+         No outbound request carries the address of this page. -->
+    <meta name="referrer" content="no-referrer">
     <title>A Toayen Card</title>
     <!--
         GitHub Pages serves this file for any path without its own page,
@@ -99,6 +103,112 @@
             letter-spacing: 1.5px;
             line-height: 1.3;
             overflow-wrap: break-word;
+        }
+
+        /* Sent gift idea (#276): the photo rides inside the sealed payload
+           and renders as a data URI, so it sits flush at the top of the card. */
+        .gift-photo {
+            display: block;
+            width: 100%;
+            max-height: 320px;
+            object-fit: cover;
+        }
+
+        /* Birthday card (#314): a sealed face, then the reveal. Gold is the
+           milestone colour from the app, fixed rather than themed. */
+        .wish-sealed {
+            padding: 56px 28px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            font: inherit;
+            color: inherit;
+        }
+
+        .wish-ring {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 2px solid #8A6A3E;
+            color: #8A6A3E;
+            font-size: 26px;
+            font-weight: 300;
+            margin-bottom: 18px;
+        }
+
+        .wish-open {
+            padding: 44px 28px;
+            text-align: center;
+            animation: wish-in 0.6s cubic-bezier(.2, .7, .3, 1);
+        }
+
+        .wish-message {
+            font-size: 17px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+        }
+
+        .wish-milestone {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #8A6A3E;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .wish-from {
+            margin-top: 18px;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .wish-sent-with {
+            margin-top: 28px;
+            font-size: 12.5px;
+            letter-spacing: 0.5px;
+            color: #999;
+        }
+
+        .wish-sent-with a {
+            color: #999;
+            text-decoration: none;
+            border-bottom: 1px solid #E0E0DC;
+        }
+
+        @keyframes wish-in {
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .wish-confetti {
+            position: absolute;
+            top: 0;
+            width: 7px;
+            height: 7px;
+            border-radius: 2px;
+            opacity: 0;
+            animation: wish-fall 1.4s cubic-bezier(.2, .7, .3, 1) forwards;
+        }
+
+        @keyframes wish-fall {
+            0% { opacity: 0; transform: translateY(-10px) rotate(0deg); }
+            15% { opacity: 0.85; }
+            100% { opacity: 0; transform: translateY(150px) rotate(200deg); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .wish-open { animation: none; }
+            .wish-confetti { display: none; }
         }
 
         .card-subtitle {
@@ -343,6 +453,21 @@
             footer a {
                 color: #888;
             }
+
+            /* Birthday card gold flips to the dark-mode token (#314). */
+            .wish-ring {
+                border-color: #C9A96A;
+                color: #C9A96A;
+            }
+
+            .wish-milestone {
+                background: #C9A96A;
+                color: #0F0F0F;
+            }
+
+            .wish-sent-with a {
+                border-bottom-color: #333;
+            }
         }
 
         /* Shared-occasion invite code (#339) */
@@ -390,9 +515,68 @@
             </div>
         </div>
 
+        <!-- Sent gift idea (#276): the same sealed links, second kind. -->
+        <div id="gift" class="card" hidden>
+            <img id="gift-photo" class="gift-photo" alt="" hidden>
+            <div class="card-header">
+                <div id="gift-avatar" class="avatar" aria-hidden="true"></div>
+                <h1 id="gift-title" class="card-name"></h1>
+                <p id="gift-subtitle" class="card-subtitle" hidden></p>
+            </div>
+            <div id="gift-details" class="card-section" hidden></div>
+        </div>
+
+        <div id="gift-actions" class="actions" hidden>
+            <a id="gift-shop" class="btn btn-primary" href="#" rel="noopener noreferrer" hidden>View the gift</a>
+            <a id="gift-open-app" class="btn btn-secondary" href="#">Add it in Toayen</a>
+            <a class="btn btn-secondary" href="https://apps.apple.com/app/id6788513717">Get Toayen on the App Store</a>
+            <p class="btn-note">Toayen keeps gift ideas, budgets and reminders for everyone you buy for.</p>
+        </div>
+
+        <!-- Birthday card (#314): a sealed face, tap to open, the message
+             inside. Deliberately nothing salesy — the small wordmark line is
+             the whole loop. -->
+        <div id="wish" class="card" style="position: relative; overflow: hidden;" hidden>
+            <button id="wish-sealed" class="wish-sealed" type="button">
+                <span id="wish-ring" class="wish-ring" aria-hidden="true"></span>
+                <h1 id="wish-for" class="card-name"></h1>
+                <p class="card-subtitle">Tap to open</p>
+            </button>
+            <div id="wish-open" class="wish-open" hidden>
+                <p id="wish-milestone" class="wish-milestone" hidden></p>
+                <p id="wish-message" class="wish-message"></p>
+                <p id="wish-from" class="wish-from" hidden></p>
+                <p class="wish-sent-with">Sent with <a href="https://toayen.co.uk">Toayen</a></p>
+            </div>
+        </div>
+
+        <!-- Secret Santa assignment (#483): the only reveal there is. -->
+        <div id="santa" class="card" hidden>
+            <button id="santa-sealed" class="wish-sealed" type="button">
+                <span class="wish-ring" aria-hidden="true">?</span>
+                <h1 id="santa-for" class="card-name"></h1>
+                <p class="card-subtitle">Tap to see who you're gifting</p>
+            </button>
+            <div id="santa-open" class="wish-open" hidden>
+                <p class="card-subtitle">You have</p>
+                <h1 id="santa-name" class="card-name"></h1>
+                <p id="santa-budget" class="wish-from" hidden></p>
+                <p id="santa-likes" class="wish-from" hidden></p>
+                <p class="wish-from">Keep it to yourself. That's the game.</p>
+                <p class="wish-sent-with">Drawn with <a href="https://toayen.co.uk">Toayen</a></p>
+            </div>
+        </div>
+
         <div id="expired" class="empty" hidden>
             <h1>This card link has expired</h1>
             <p>Card links last 90 days. Ask the sender to share a fresh one from Toayen, it only takes two taps.</p>
+        </div>
+
+        <!-- A link its sender deliberately retired (#483): most often a
+             Secret Santa redraw handing out fresh links. -->
+        <div id="revoked" class="empty" hidden>
+            <h1>This link was replaced</h1>
+            <p>The sender retired it, usually because a fresh one is on its way. Ask them for their newest link.</p>
         </div>
 
         <div id="broken" class="empty" hidden>
@@ -516,7 +700,8 @@
             return res.json().then(function (body) { return { status: res.status, body: body }; });
         }).then(function (result) {
             if (result.status !== 200 || !result.body || typeof result.body.ciphertext !== 'string') {
-                fail(result.body && result.body.error === 'expired' ? 'expired' : 'broken');
+                var reason = result.body && result.body.error;
+                fail(reason === 'expired' ? 'expired' : reason === 'revoked' ? 'revoked' : 'broken');
                 return;
             }
             var combined;
@@ -536,7 +721,17 @@
                     var payload = null;
                     try { payload = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(plain))); } catch (e) {}
                     if (!payload) { fail('broken'); return; }
-                    render(payload, new Uint8Array(plain));
+                    // Newer payload kinds (#276, #314). Person card JSON has
+                    // no `kind` at all, so nothing existing can misroute.
+                    if (payload.kind === 'gift') {
+                        renderGift(payload, new Uint8Array(plain));
+                    } else if (payload.kind === 'birthdayCard') {
+                        renderWish(payload);
+                    } else if (payload.kind === 'secretSanta') {
+                        renderSanta(payload);
+                    } else {
+                        render(payload, new Uint8Array(plain));
+                    }
                 })
                 .catch(function () { fail('broken'); });
         }).catch(function () { fail('broken'); });
@@ -643,6 +838,180 @@
             show('card');
             show('actions');
             document.title = name + "'s Toayen Card";
+        }
+
+        // A sent gift idea (#276). Same discipline as render(): every field
+        // is untrusted input even after it decrypts cleanly — textContent
+        // only, the photo embeds as a checked data URI, and only plain web
+        // URLs ever become a tappable button.
+        function renderGift(payload, plainBytes) {
+            if (typeof payload.title !== 'string' || !payload.title.trim()) { fail('broken'); return; }
+            var title = payload.title.trim().slice(0, 100);
+
+            var hasPhoto = typeof payload.photo === 'string' &&
+                payload.photo.length > 0 && payload.photo.length <= 48000 &&
+                /^[A-Za-z0-9+/]+={0,2}$/.test(payload.photo);
+            if (hasPhoto) {
+                var img = document.getElementById('gift-photo');
+                img.src = 'data:image/jpeg;base64,' + payload.photo;
+                img.hidden = false;
+                document.getElementById('gift-avatar').hidden = true;
+            } else {
+                document.getElementById('gift-avatar').textContent = title.charAt(0).toUpperCase();
+            }
+
+            document.getElementById('gift-title').textContent = title;
+
+            if (typeof payload.senderName === 'string' && payload.senderName.trim()) {
+                var subtitle = document.getElementById('gift-subtitle');
+                subtitle.textContent = 'Sent by ' + payload.senderName.trim().slice(0, 100);
+                subtitle.hidden = false;
+            }
+
+            var details = document.getElementById('gift-details');
+            var price = payload.estimatedPrice;
+            if (typeof price === 'number' && isFinite(price) && price > 0 && price < 1000000) {
+                var priceText = String(Math.round(price * 100) / 100);
+                if (typeof payload.currency === 'string' && /^[A-Z]{3}$/.test(payload.currency)) {
+                    try {
+                        priceText = new Intl.NumberFormat(undefined, { style: 'currency', currency: payload.currency }).format(price);
+                    } catch (e) { priceText = payload.currency + ' ' + priceText; }
+                }
+                details.appendChild(detailRow('Around', priceText));
+                details.hidden = false;
+            }
+            if (typeof payload.retailer === 'string' && payload.retailer.trim()) {
+                details.appendChild(detailRow('Retailer', payload.retailer.trim().slice(0, 50)));
+                details.hidden = false;
+            }
+            if (typeof payload.recipientName === 'string' && payload.recipientName.trim()) {
+                details.appendChild(detailRow('For', payload.recipientName.trim().slice(0, 100)));
+                details.hidden = false;
+            }
+
+            if (typeof payload.productURL === 'string' &&
+                payload.productURL.length <= 2000 &&
+                /^https?:\/\//i.test(payload.productURL)) {
+                var shop = document.getElementById('gift-shop');
+                shop.href = payload.productURL;
+                shop.hidden = false;
+            }
+
+            document.getElementById('gift-open-app').href =
+                'toayen://import?data=' + encodeURIComponent(bytesToB64url(plainBytes));
+
+            hide('loading');
+            show('gift');
+            show('gift-actions');
+            document.title = title + ' · a gift idea on Toayen';
+        }
+
+        // A birthday card (#314): the sealed face first, the message only
+        // after the tap — that IS the card. Same textContent discipline;
+        // the payload stays untrusted even after it decrypts.
+        function renderWish(payload) {
+            if (typeof payload.recipientName !== 'string' || !payload.recipientName.trim() ||
+                typeof payload.message !== 'string' || !payload.message.trim()) {
+                fail('broken');
+                return;
+            }
+            var forName = payload.recipientName.trim().slice(0, 100);
+            var message = payload.message.trim().slice(0, 1200);
+
+            document.getElementById('wish-ring').textContent = forName.charAt(0).toUpperCase();
+            document.getElementById('wish-for').textContent = 'A birthday card for ' + forName;
+            document.getElementById('wish-message').textContent = message;
+
+            if (typeof payload.milestone === 'string' && /^[0-9]{1,3}(st|nd|rd|th)$/.test(payload.milestone.trim())) {
+                var pill = document.getElementById('wish-milestone');
+                pill.textContent = 'The big ' + payload.milestone.trim();
+                pill.hidden = false;
+            }
+            if (typeof payload.senderName === 'string' && payload.senderName.trim()) {
+                var from = document.getElementById('wish-from');
+                from.textContent = 'From ' + payload.senderName.trim().slice(0, 100);
+                from.hidden = false;
+            }
+
+            var sealed = document.getElementById('wish-sealed');
+            sealed.addEventListener('click', function () {
+                sealed.hidden = true;
+                show('wish-open');
+                // A short gold-and-grey confetti fall, skipped entirely when
+                // the visitor prefers reduced motion.
+                if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    var card = document.getElementById('wish');
+                    var colours = ['#C9A96A', '#8A6A3E', '#B8B8B4'];
+                    for (var i = 0; i < 14; i++) {
+                        var bit = document.createElement('span');
+                        bit.className = 'wish-confetti';
+                        bit.style.left = (6 + Math.random() * 88) + '%';
+                        bit.style.background = colours[i % colours.length];
+                        bit.style.animationDelay = (Math.random() * 0.35) + 's';
+                        card.appendChild(bit);
+                    }
+                }
+            }, { once: true });
+
+            hide('loading');
+            show('wish');
+            document.title = 'A birthday card for ' + forName;
+        }
+
+        // A Secret Santa assignment (#483). The name exists on screen only
+        // after the tap; the sealed face says whose link it is so a
+        // misdirected link is obvious before it gives anything away.
+        function renderSanta(payload) {
+            if (typeof payload.playerName !== 'string' || !payload.playerName.trim() ||
+                typeof payload.assigneeName !== 'string' || !payload.assigneeName.trim()) {
+                fail('broken');
+                return;
+            }
+            var player = payload.playerName.trim().slice(0, 100);
+            var assignee = payload.assigneeName.trim().slice(0, 100);
+            var occasion = (typeof payload.occasionName === 'string' && payload.occasionName.trim())
+                ? ' for ' + payload.occasionName.trim().slice(0, 100) : '';
+
+            document.getElementById('santa-for').textContent =
+                player + ', your Secret Santa draw' + occasion;
+            document.getElementById('santa-name').textContent = assignee;
+
+            var budget = payload.budget;
+            if (typeof budget === 'number' && isFinite(budget) && budget > 0 && budget < 1000000) {
+                var text = String(Math.round(budget * 100) / 100);
+                if (typeof payload.currency === 'string' && /^[A-Z]{3}$/.test(payload.currency)) {
+                    try {
+                        text = new Intl.NumberFormat(undefined, { style: 'currency', currency: payload.currency }).format(budget);
+                    } catch (e) { text = payload.currency + ' ' + text; }
+                }
+                var budgetLine = document.getElementById('santa-budget');
+                budgetLine.textContent = 'Spending cap ' + text;
+                budgetLine.hidden = false;
+            }
+
+            if (Array.isArray(payload.assigneeLikes)) {
+                var likes = [];
+                for (var i = 0; i < payload.assigneeLikes.length && likes.length < 8; i++) {
+                    if (typeof payload.assigneeLikes[i] === 'string' && payload.assigneeLikes[i].trim()) {
+                        likes.push(payload.assigneeLikes[i].trim().slice(0, 50).toLowerCase());
+                    }
+                }
+                if (likes.length) {
+                    var likesLine = document.getElementById('santa-likes');
+                    likesLine.textContent = 'They like ' + likes.join(', ');
+                    likesLine.hidden = false;
+                }
+            }
+
+            var sealed = document.getElementById('santa-sealed');
+            sealed.addEventListener('click', function () {
+                sealed.hidden = true;
+                show('santa-open');
+            }, { once: true });
+
+            hide('loading');
+            show('santa');
+            document.title = 'Your Secret Santa draw';
         }
     })();
     </script>
