@@ -402,6 +402,136 @@
         .stage .wish-open .wish-sent-with { color: #6E685C; }
         .stage .wish-open .wish-sent-with a { color: #6E685C; border-bottom-color: #3A362C; }
 
+        /* Balloons (#314 round 4): soft-lit ellipses on strings, bobbing
+           on their own rhythms until popped. */
+        .balloon-field {
+            position: relative;
+            height: 340px;
+        }
+
+        .balloon {
+            position: absolute;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            animation: balloon-bob ease-in-out infinite alternate;
+            transition: transform 0.22s, opacity 0.22s;
+        }
+
+        .balloon.popped {
+            transform: scale(1.3);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .balloon-body {
+            display: block;
+            width: 54px;
+            height: 66px;
+            border-radius: 50%;
+        }
+
+        .balloon-string {
+            display: block;
+            width: 1px;
+            height: 34px;
+            margin: 0 auto;
+            background: rgba(142, 142, 142, 0.5);
+        }
+
+        @keyframes balloon-bob {
+            from { transform: translateY(-7px) rotate(-2deg); }
+            to { transform: translateY(7px) rotate(2deg); }
+        }
+
+        /* Starlight: a field of twinkling points; the wish is drawn by the
+           canvas engine along the swipe. */
+        .star {
+            position: fixed;
+            border-radius: 50%;
+            background: #F0EDE6;
+            animation: star-twinkle ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes star-twinkle {
+            from { opacity: 0.25; }
+            to { opacity: 0.9; }
+        }
+
+        /* Unwrap: a minimal parcel, gold ribbon crossed over it. */
+        .parcel {
+            position: relative;
+            width: 210px;
+            height: 184px;
+            margin: 0 auto;
+            perspective: 700px;
+        }
+
+        .parcel-box {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 150px;
+            border-radius: 10px;
+            background: #1E1B15;
+            border: 1px solid #4A4436;
+        }
+
+        .parcel-lid {
+            position: absolute;
+            left: -8px;
+            right: -8px;
+            top: 0;
+            height: 34px;
+            border-radius: 8px;
+            background: #26221A;
+            border: 1px solid #5A523F;
+            transform-origin: top center;
+            transition: transform 0.7s cubic-bezier(.2, .7, .3, 1);
+        }
+
+        .parcel.untied .parcel-lid {
+            transform: rotateX(-105deg);
+        }
+
+        .parcel-ribbon {
+            position: absolute;
+            left: 50%;
+            top: -14px;
+            bottom: -6px;
+            width: 14px;
+            margin-left: -7px;
+            background: #C9A96A;
+            cursor: grab;
+            touch-action: none;
+            transition: opacity 0.45s;
+        }
+
+        .parcel-ribbon::before,
+        .parcel-ribbon::after {
+            content: "";
+            position: absolute;
+            top: -8px;
+            width: 26px;
+            height: 16px;
+            border-radius: 50%;
+            background: #C9A96A;
+        }
+
+        .parcel-ribbon::before { left: -20px; }
+        .parcel-ribbon::after { right: -20px; }
+
+        .parcel.untied .parcel-ribbon {
+            transform: translateX(320px) rotate(18deg) !important;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.5s cubic-bezier(.2, .7, .3, 1), opacity 0.5s;
+        }
+
         /* Confetti: while held, the sealed card draws tight and shimmers. */
         .wish-sealed.holding {
             transform: scale(0.96);
@@ -1152,8 +1282,8 @@
             }
 
             // Round 3 (#314): three reveal styles, chosen by the sender.
-            var style = (payload.theme === 'candlelight' || payload.theme === 'fireworks')
-                ? payload.theme : 'confetti';
+            var KNOWN_STYLES = ['candlelight', 'fireworks', 'balloons', 'starlight', 'unwrap'];
+            var style = KNOWN_STYLES.indexOf(payload.theme) >= 0 ? payload.theme : 'confetti';
             var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             var sealed = document.getElementById('wish-sealed');
 
@@ -1419,7 +1549,10 @@
             skip.addEventListener('click', function () { stageMessage(); }, { once: true });
 
             if (style === 'candlelight') { candleScene(payload); }
-            else { fireworksScene(); }
+            else if (style === 'fireworks') { fireworksScene(); }
+            else if (style === 'balloons') { balloonScene(); }
+            else if (style === 'starlight') { starlightScene(); }
+            else { unwrapScene(); }
         }
 
         var stageDone = false;
@@ -1496,6 +1629,169 @@
                 });
                 row.appendChild(candle);
             }
+        }
+
+        // A dozen bright bits flying out of a popped balloon.
+        function popAt(x, y) {
+            ensureEngine();
+            var now = performance.now() / 1000;
+            for (var i = 0; i < 12; i++) {
+                var angle = (i / 12) * Math.PI * 2;
+                var speed = 90 + ((i * 29) % 40);
+                particles.push({
+                    x: x, y: y,
+                    vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+                    gravity: 60, spin: 0, tumble: 1,
+                    size: 2, life: 0.7, rect: false,
+                    colour: GOLDS[i % GOLDS.length], start: now
+                });
+            }
+            engineKick();
+        }
+
+        function balloonScene() {
+            document.getElementById('stage-hint').textContent = 'Pop them';
+            var row = document.getElementById('candle-row');
+            row.hidden = false;
+            row.className = 'balloon-field';
+
+            var colours = ['#C9A96A', '#B8B8B4', '#E8B75A', '#B08D57', '#D8D8D4', '#C9A96A'];
+            var remaining = 6;
+            for (var i = 0; i < 6; i++) {
+                var balloon = document.createElement('button');
+                balloon.type = 'button';
+                balloon.className = 'balloon';
+                balloon.setAttribute('aria-label', 'Balloon. Pops it.');
+                var col = i % 3, rowIndex = Math.floor(i / 3);
+                balloon.style.left = (10 + col * 30 + (rowIndex === 1 ? 12 : 0)) + '%';
+                balloon.style.top = (rowIndex * 46 + 8) + '%';
+                balloon.style.animationDuration = (1.6 + Math.random() * 1.2) + 's';
+                balloon.style.animationDelay = (Math.random() * 0.8) + 's';
+
+                var body = document.createElement('span');
+                body.className = 'balloon-body';
+                body.style.background =
+                    'radial-gradient(ellipse at 35% 30%, rgba(255,243,214,0.9) 0%, ' + colours[i] + ' 55%, rgba(20,18,12,0.55) 100%)';
+                balloon.appendChild(body);
+                var string = document.createElement('span');
+                string.className = 'balloon-string';
+                balloon.appendChild(string);
+
+                balloon.addEventListener('click', function () {
+                    if (this.classList.contains('popped')) { return; }
+                    var rect = this.getBoundingClientRect();
+                    popAt(rect.left + rect.width / 2, rect.top + rect.height * 0.35);
+                    this.classList.add('popped');
+                    remaining--;
+                    if (remaining === 0) {
+                        window.setTimeout(stageMessage, 600);
+                    }
+                });
+                row.appendChild(balloon);
+            }
+        }
+
+        function starlightScene() {
+            document.getElementById('stage-hint').textContent = 'Swipe for a shooting star';
+            // A field of twinkling points, cheap and DOM.
+            for (var i = 0; i < 34; i++) {
+                var star = document.createElement('span');
+                star.className = 'star';
+                var size = 1.2 + Math.random() * 1.6;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = (3 + Math.random() * 94) + '%';
+                star.style.top = (5 + Math.random() * 85) + '%';
+                star.style.animationDuration = (1.8 + Math.random() * 2.4) + 's';
+                star.style.animationDelay = (Math.random() * 2) + 's';
+                document.getElementById('stage').appendChild(star);
+            }
+
+            var from = null;
+            var wished = false;
+            var stage = document.getElementById('stage');
+            stage.addEventListener('pointerdown', function (event) {
+                from = { x: event.clientX, y: event.clientY };
+            });
+            stage.addEventListener('pointerup', function (event) {
+                if (!from) { return; }
+                var dx = event.clientX - from.x;
+                var dy = event.clientY - from.y;
+                if (Math.hypot(dx, dy) < 24) { from = null; return; }
+                // The star flies your line, extended past where the finger
+                // stopped, drawn by the engine as a head and a trail.
+                ensureEngine();
+                var now = performance.now() / 1000;
+                var speed = 1 / 0.7;
+                particles.push({
+                    x: from.x, y: from.y,
+                    vx: dx * 1.6 * speed, vy: dy * 1.6 * speed,
+                    gravity: 0, spin: 0, tumble: 1,
+                    size: 2.2, life: 0.8, rect: false,
+                    colour: '#FFF3D6', start: now
+                });
+                for (var t = 1; t <= 8; t++) {
+                    particles.push({
+                        x: from.x, y: from.y,
+                        vx: dx * 1.6 * speed, vy: dy * 1.6 * speed,
+                        gravity: 0, spin: 0, tumble: 1,
+                        size: 1.2, life: 0.55, rect: false,
+                        colour: '#E8B75A', start: now + t * 0.035
+                    });
+                }
+                engineKick();
+                from = null;
+                document.getElementById('stage-hint').style.opacity = '0.35';
+                if (!wished) {
+                    wished = true;
+                    window.setTimeout(stageMessage, 1200);
+                }
+            });
+        }
+
+        function unwrapScene() {
+            document.getElementById('stage-hint').textContent = 'Pull the ribbon';
+            var row = document.getElementById('candle-row');
+            row.hidden = false;
+
+            var parcel = document.createElement('div');
+            parcel.className = 'parcel';
+            var box = document.createElement('div');
+            box.className = 'parcel-box';
+            var lid = document.createElement('div');
+            lid.className = 'parcel-lid';
+            var ribbon = document.createElement('div');
+            ribbon.className = 'parcel-ribbon';
+            ribbon.setAttribute('role', 'button');
+            ribbon.setAttribute('aria-label', 'Ribbon. Pulls it off the parcel.');
+            parcel.appendChild(box);
+            parcel.appendChild(lid);
+            parcel.appendChild(ribbon);
+            row.appendChild(parcel);
+
+            var startX = null;
+            var untied = false;
+            function untie() {
+                if (untied) { return; }
+                untied = true;
+                parcel.classList.add('untied');
+                window.setTimeout(stageMessage, 1050);
+            }
+            ribbon.addEventListener('pointerdown', function (event) {
+                startX = event.clientX;
+                ribbon.setPointerCapture(event.pointerId);
+            });
+            ribbon.addEventListener('pointermove', function (event) {
+                if (startX === null || untied) { return; }
+                var dx = event.clientX - startX;
+                ribbon.style.transform = 'translateX(' + dx + 'px)';
+                if (Math.abs(dx) > 90) { untie(); }
+            });
+            ribbon.addEventListener('pointerup', function () {
+                if (!untied) { ribbon.style.transform = ''; }
+                startX = null;
+            });
+            ribbon.addEventListener('click', untie);
         }
 
         function fireworksScene() {
