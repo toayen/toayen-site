@@ -141,11 +141,44 @@
             margin-bottom: 18px;
         }
 
+        /* Round 2 (#314): the card opens like a card. The sealed face is
+           lifted away like a cover being turned; the inside is revealed
+           beneath it in stages rather than swapped in. */
+        .card-reveal {
+            position: relative;
+            overflow: hidden;
+            perspective: 1200px;
+        }
+
+        .wish-sealed.opening {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            background: white;
+            transform-origin: top center;
+            animation: wish-cover 0.85s cubic-bezier(.2, .7, .3, 1) forwards;
+        }
+
+        @keyframes wish-cover {
+            60% { opacity: 1; }
+            to { transform: rotateX(-88deg); opacity: 0; }
+        }
+
         .wish-open {
             padding: 44px 28px;
             text-align: center;
-            animation: wish-in 0.6s cubic-bezier(.2, .7, .3, 1);
         }
+
+        /* The inside arrives in stages: pill, message, from, wordmark. */
+        .wish-open > * {
+            animation: wish-in 0.55s cubic-bezier(.2, .7, .3, 1) both;
+        }
+        .wish-open > *:nth-child(1) { animation-delay: 0.25s; }
+        .wish-open > *:nth-child(2) { animation-delay: 0.55s; }
+        .wish-open > *:nth-child(3) { animation-delay: 0.85s; }
+        .wish-open > *:nth-child(4) { animation-delay: 1.15s; }
+        .wish-open > *:nth-child(5) { animation-delay: 1.45s; }
+        .wish-open > *:nth-child(6) { animation-delay: 1.75s; }
 
         .wish-message {
             font-size: 17px;
@@ -190,25 +223,56 @@
             to { opacity: 1; transform: none; }
         }
 
+        /* Confetti that owns the screen (#314 round 2): the whole viewport,
+           gold-led, tumbling and swaying for seconds — not a flicker inside
+           the card. Three nested elements so fall, sway and tumble each get
+           their own transform. */
+        .wish-confetti-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 5;
+        }
+
         .wish-confetti {
             position: absolute;
-            top: 0;
-            width: 7px;
-            height: 7px;
+            top: -8vh;
+            animation: wish-fall linear forwards;
+        }
+
+        .wish-confetti-sway {
+            display: block;
+            animation: wish-sway ease-in-out infinite alternate;
+        }
+
+        .wish-confetti-piece {
+            display: block;
             border-radius: 2px;
-            opacity: 0;
-            animation: wish-fall 1.4s cubic-bezier(.2, .7, .3, 1) forwards;
+            animation: wish-tumble linear infinite;
         }
 
         @keyframes wish-fall {
-            0% { opacity: 0; transform: translateY(-10px) rotate(0deg); }
-            15% { opacity: 0.85; }
-            100% { opacity: 0; transform: translateY(150px) rotate(200deg); }
+            0% { transform: translateY(0); opacity: 0; }
+            5% { opacity: 0.95; }
+            85% { opacity: 0.95; }
+            100% { transform: translateY(120vh); opacity: 0; }
+        }
+
+        @keyframes wish-sway {
+            from { transform: translateX(-16px); }
+            to { transform: translateX(16px); }
+        }
+
+        @keyframes wish-tumble {
+            from { transform: rotate3d(1, 0.6, 0.2, 0deg); }
+            to { transform: rotate3d(1, 0.6, 0.2, 360deg); }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .wish-open { animation: none; }
-            .wish-confetti { display: none; }
+            .wish-sealed.opening { animation: none; display: none; }
+            .wish-open > * { animation: none; }
+            .wish-confetti-layer { display: none; }
         }
 
         .card-subtitle {
@@ -454,6 +518,10 @@
                 color: #888;
             }
 
+            .wish-sealed.opening {
+                background: #1A1A1A;
+            }
+
             /* Birthday card gold flips to the dark-mode token (#314). */
             .wish-ring {
                 border-color: #C9A96A;
@@ -536,7 +604,7 @@
         <!-- Birthday card (#314): a sealed face, tap to open, the message
              inside. Deliberately nothing salesy — the small wordmark line is
              the whole loop. -->
-        <div id="wish" class="card" style="position: relative; overflow: hidden;" hidden>
+        <div id="wish" class="card card-reveal" hidden>
             <button id="wish-sealed" class="wish-sealed" type="button">
                 <span id="wish-ring" class="wish-ring" aria-hidden="true"></span>
                 <h1 id="wish-for" class="card-name"></h1>
@@ -551,7 +619,7 @@
         </div>
 
         <!-- Secret Santa assignment (#483): the only reveal there is. -->
-        <div id="santa" class="card" hidden>
+        <div id="santa" class="card card-reveal" hidden>
             <button id="santa-sealed" class="wish-sealed" type="button">
                 <span class="wish-ring" aria-hidden="true">?</span>
                 <h1 id="santa-for" class="card-name"></h1>
@@ -935,22 +1003,8 @@
 
             var sealed = document.getElementById('wish-sealed');
             sealed.addEventListener('click', function () {
-                sealed.hidden = true;
-                show('wish-open');
-                // A short gold-and-grey confetti fall, skipped entirely when
-                // the visitor prefers reduced motion.
-                if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                    var card = document.getElementById('wish');
-                    var colours = ['#C9A96A', '#8A6A3E', '#B8B8B4'];
-                    for (var i = 0; i < 14; i++) {
-                        var bit = document.createElement('span');
-                        bit.className = 'wish-confetti';
-                        bit.style.left = (6 + Math.random() * 88) + '%';
-                        bit.style.background = colours[i % colours.length];
-                        bit.style.animationDelay = (Math.random() * 0.35) + 's';
-                        card.appendChild(bit);
-                    }
-                }
+                openReveal(sealed, 'wish-open');
+                dropConfetti();
             }, { once: true });
 
             hide('loading');
@@ -1005,13 +1059,66 @@
 
             var sealed = document.getElementById('santa-sealed');
             sealed.addEventListener('click', function () {
-                sealed.hidden = true;
-                show('santa-open');
+                // The flip and the staging, but no confetti — this reveal is
+                // suspense, not celebration.
+                openReveal(sealed, 'santa-open');
             }, { once: true });
 
             hide('loading');
             show('santa');
             document.title = 'Your Secret Santa draw';
+        }
+
+        // Round 2 (#314): the sealed face lifts away like a cover being
+        // turned while the inside arrives in stages beneath it. Reduced
+        // motion collapses to the plain swap via the CSS above.
+        function openReveal(sealedButton, openId) {
+            show(openId);
+            var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reduced) {
+                sealedButton.hidden = true;
+                return;
+            }
+            sealedButton.classList.add('opening');
+            sealedButton.disabled = true;
+            window.setTimeout(function () { sealedButton.hidden = true; }, 900);
+        }
+
+        // Confetti across the whole viewport: gold-led, tumbling and
+        // swaying for seconds. The bar is simple — nobody should need to
+        // be asked whether they saw it.
+        function dropConfetti() {
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+            var layer = document.createElement('div');
+            layer.className = 'wish-confetti-layer';
+            var colours = ['#C9A96A', '#B08D57', '#8A6A3E', '#C9A96A', '#B8B8B4'];
+            for (var i = 0; i < 40; i++) {
+                var fall = document.createElement('span');
+                fall.className = 'wish-confetti';
+                fall.style.left = (2 + Math.random() * 96) + '%';
+                fall.style.animationDuration = (3.1 + Math.random() * 1.6) + 's';
+                fall.style.animationDelay = (Math.random() * 1.6) + 's';
+
+                var sway = document.createElement('span');
+                sway.className = 'wish-confetti-sway';
+                sway.style.animationDuration = (1.1 + Math.random() * 0.7) + 's';
+                sway.style.animationDelay = (Math.random() * 0.6) + 's';
+
+                var piece = document.createElement('span');
+                piece.className = 'wish-confetti-piece';
+                var size = 8 + Math.random() * 7;
+                piece.style.width = size + 'px';
+                piece.style.height = (size * (0.55 + Math.random() * 0.5)) + 'px';
+                piece.style.background = colours[i % colours.length];
+                piece.style.animationDuration = (0.9 + Math.random() * 0.8) + 's';
+
+                sway.appendChild(piece);
+                fall.appendChild(sway);
+                layer.appendChild(fall);
+            }
+            document.body.appendChild(layer);
+            // The longest piece is done by ~6.5s; the layer goes with it.
+            window.setTimeout(function () { layer.remove(); }, 7000);
         }
     })();
     </script>
