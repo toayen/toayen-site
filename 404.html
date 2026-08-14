@@ -16,9 +16,13 @@
         send fragments to any server. This page makes exactly one request —
         to Toayen's own backend, sending only the short code — receives the
         sealed card, and opens it locally in your browser. The server cannot
-        read the card; the key never leaves this page. Nothing else is
-        fetched from anywhere except our own logo, which carries no card
-        data. Any other unknown path shows a plain not-found note below.
+        read the card; the key never leaves this page. Secret Santa cards
+        may also exchange anonymous Q&A messages with the same backend,
+        addressed by random tokens that exist only inside sealed cards — the
+        server relays text without ever learning a name or a pairing.
+        Nothing else is fetched from anywhere except our own logo, which
+        carries no card data. Any other unknown path shows a plain
+        not-found note below.
     -->
     <style>
         * {
@@ -532,6 +536,61 @@
             transition: transform 0.5s cubic-bezier(.2, .7, .3, 1), opacity 0.5s;
         }
 
+        /* Anonymous Q&A (#544) on the Secret Santa card. */
+        .qa-section { margin-top: 16px; text-align: left; }
+
+        .qa-title {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .qa-thread { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+
+        .qa-message {
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            background: rgba(107, 107, 107, 0.1);
+            max-width: 85%;
+            overflow-wrap: break-word;
+        }
+
+        .qa-message.mine {
+            align-self: flex-end;
+            background: rgba(201, 169, 106, 0.18);
+        }
+
+        .qa-input { display: flex; gap: 8px; }
+
+        .qa-input input {
+            flex: 1;
+            font: inherit;
+            font-size: 14px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            border: 1px solid #EEEEEC;
+            background: white;
+            color: inherit;
+        }
+
+        .qa-input button {
+            font: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 9px 14px;
+            border-radius: 10px;
+            border: none;
+            background: #2C2C2C;
+            color: white;
+            cursor: pointer;
+        }
+
+        .qa-note { font-size: 11px; color: #999; margin-top: 8px; }
+
         /* Confetti: while held, the sealed card draws tight and shimmers. */
         .wish-sealed.holding {
             transform: scale(0.96);
@@ -792,6 +851,15 @@
                 background: #1A1A1A;
             }
 
+            .qa-input input {
+                background: #222;
+                border-color: #333;
+            }
+
+            .qa-input button {
+                background: #555;
+            }
+
             /* Birthday card gold flips to the dark-mode token (#314). */
             .wish-ring {
                 border-color: #C9A96A;
@@ -909,8 +977,28 @@
                 <p class="card-subtitle">You have</p>
                 <h1 id="santa-name" class="card-name"></h1>
                 <p id="santa-budget" class="wish-from" hidden></p>
+                <p id="santa-rules" class="wish-milestone" hidden></p>
                 <p id="santa-likes" class="wish-from" hidden></p>
                 <p class="wish-from">Keep it to yourself. That's the game.</p>
+                <div id="qa-ask" class="qa-section" hidden>
+                    <p class="qa-title" id="qa-ask-title"></p>
+                    <div class="qa-thread" id="qa-ask-thread"></div>
+                    <div class="qa-input">
+                        <input id="qa-ask-input" type="text" maxlength="500"
+                               placeholder="Sizes, colours, already-owned checks">
+                        <button id="qa-ask-send" type="button">Ask</button>
+                    </div>
+                </div>
+                <div id="qa-inbox" class="qa-section" hidden>
+                    <p class="qa-title">Questions for you, from your Santa</p>
+                    <div class="qa-thread" id="qa-inbox-thread"></div>
+                    <div class="qa-input">
+                        <input id="qa-inbox-input" type="text" maxlength="500"
+                               placeholder="Answer without knowing who asked">
+                        <button id="qa-inbox-send" type="button">Reply</button>
+                    </div>
+                </div>
+                <p class="qa-note" id="qa-note" hidden>Answers arrive on this card. Check back, nobody is told who asked.</p>
                 <p class="wish-sent-with">Drawn with <a href="https://toayen.co.uk">Toayen</a></p>
             </div>
         </div>
@@ -1353,6 +1441,20 @@
                 budgetLine.hidden = false;
             }
 
+            if (Array.isArray(payload.rules)) {
+                var rules = [];
+                for (var ri = 0; ri < payload.rules.length && rules.length < 3; ri++) {
+                    if (typeof payload.rules[ri] === 'string' && payload.rules[ri].trim()) {
+                        rules.push(payload.rules[ri].trim().slice(0, 60));
+                    }
+                }
+                if (rules.length) {
+                    var rulesLine = document.getElementById('santa-rules');
+                    rulesLine.textContent = rules.join(' · ');
+                    rulesLine.hidden = false;
+                }
+            }
+
             if (Array.isArray(payload.assigneeLikes)) {
                 var likes = [];
                 for (var i = 0; i < payload.assigneeLikes.length && likes.length < 8; i++) {
@@ -1372,11 +1474,91 @@
                 // The flip and the staging, but no confetti — this reveal is
                 // suspense, not celebration.
                 openReveal(sealed, 'santa-open');
+                setupSantaQA(payload, assignee);
             }, { once: true });
 
             hide('loading');
             show('santa');
             document.title = 'Your Secret Santa draw';
+        }
+
+        // Anonymous Q&A (#544): the tokens live only inside sealed cards;
+        // this page relays text and renders it via textContent, nothing more.
+        function validToken(token) {
+            return typeof token === 'string' && /^[A-Za-z0-9_-]{16,64}$/.test(token);
+        }
+
+        function santaCall(body) {
+            return fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            }).then(function (res) { return res.json(); });
+        }
+
+        function renderThread(containerId, messages, mineWhenAsker) {
+            var container = document.getElementById(containerId);
+            container.textContent = '';
+            for (var i = 0; i < messages.length; i++) {
+                var message = messages[i];
+                if (typeof message.body !== 'string') { continue; }
+                var bubble = document.createElement('div');
+                bubble.className = message.from_asker === mineWhenAsker ? 'qa-message mine' : 'qa-message';
+                bubble.textContent = message.body.slice(0, 500);
+                container.appendChild(bubble);
+            }
+        }
+
+        function setupSantaQA(payload, assignee) {
+            var askToken = validToken(payload.askToken) ? payload.askToken : null;
+            var inboxToken = validToken(payload.inboxToken) ? payload.inboxToken : null;
+            if (!askToken && !inboxToken) { return; }
+            document.getElementById('qa-note').hidden = false;
+
+            function refresh() {
+                if (askToken) {
+                    santaCall({ action: 'santa_fetch', token: askToken }).then(function (result) {
+                        if (result && Array.isArray(result.messages)) {
+                            renderThread('qa-ask-thread', result.messages, true);
+                        }
+                    }).catch(function () {});
+                }
+                if (inboxToken) {
+                    santaCall({ action: 'santa_fetch', token: inboxToken }).then(function (result) {
+                        if (result && Array.isArray(result.messages)) {
+                            var section = document.getElementById('qa-inbox');
+                            if (result.messages.length) { section.hidden = false; }
+                            renderThread('qa-inbox-thread', result.messages, false);
+                        }
+                    }).catch(function () {});
+                }
+            }
+
+            if (askToken) {
+                var askSection = document.getElementById('qa-ask');
+                askSection.hidden = false;
+                document.getElementById('qa-ask-title').textContent =
+                    'Ask ' + assignee.split(' ')[0] + ' something, anonymously';
+                document.getElementById('qa-ask-send').addEventListener('click', function () {
+                    var input = document.getElementById('qa-ask-input');
+                    var text = input.value.trim();
+                    if (!text) { return; }
+                    santaCall({ action: 'santa_post', token: askToken, from_asker: true, body: text })
+                        .then(function () { input.value = ''; refresh(); })
+                        .catch(function () {});
+                });
+            }
+            if (inboxToken) {
+                document.getElementById('qa-inbox-send').addEventListener('click', function () {
+                    var input = document.getElementById('qa-inbox-input');
+                    var text = input.value.trim();
+                    if (!text) { return; }
+                    santaCall({ action: 'santa_post', token: inboxToken, from_asker: false, body: text })
+                        .then(function () { input.value = ''; refresh(); })
+                        .catch(function () {});
+                });
+            }
+            refresh();
         }
 
         // Round 2 (#314): the sealed face lifts away like a cover being
