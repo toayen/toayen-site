@@ -35,7 +35,12 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #FAFAF9;
             color: #1A1A1A;
+            /* dvh where supported (#546): 100vh on iOS is the browser-bars-
+               hidden height, so "centred" content sat lower than it looked
+               and the closing lines ended up under Safari's floating URL
+               capsule. The vh line stays as the fallback. */
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
         }
@@ -44,7 +49,8 @@
             width: 100%;
             max-width: 430px;
             margin: 0 auto;
-            padding: 24px 20px 40px;
+            /* Bottom clearance for Safari's floating controls (#546). */
+            padding: 24px 20px calc(72px + env(safe-area-inset-bottom, 0px));
             display: flex;
             flex-direction: column;
             flex: 1;
@@ -222,6 +228,13 @@
             border-bottom: 1px solid #E0E0DC;
         }
 
+        /* #547: the santa card's app door sits outside the centred reveal
+           block, so it centres and pads itself. */
+        .santa-app-door {
+            text-align: center;
+            padding: 0 24px 20px;
+        }
+
         @keyframes wish-in {
             from { opacity: 0; transform: translateY(12px) scale(0.98); filter: blur(5px); }
             to { opacity: 1; transform: none; filter: blur(0); }
@@ -236,8 +249,13 @@
             background: #0B0B0B;
             z-index: 4;
             display: flex;
-            align-items: center;
             justify-content: center;
+            /* Scroll rather than clip when the message outgrows the screen,
+               and keep the closing lines clear of Safari's floating URL
+               capsule (#546). Centring moves to the child's auto margins —
+               align-items: center would clip the top of tall content. */
+            overflow-y: auto;
+            padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
             opacity: 0;
             transition: opacity 0.6s cubic-bezier(.2, .7, .3, 1);
         }
@@ -248,6 +266,7 @@
             width: 100%;
             max-width: 430px;
             padding: 24px 20px;
+            margin: auto;
             text-align: center;
         }
 
@@ -1001,6 +1020,9 @@
                 <p class="qa-note" id="qa-note" hidden>Answers arrive on this card. Check back, nobody is told who asked.</p>
                 <p class="wish-sent-with">Drawn with <a href="https://toayen.co.uk">Toayen</a></p>
             </div>
+            <!-- #547: the dependable door into the app when the universal
+                 link opened in the browser anyway. Quiet on purpose. -->
+            <p class="wish-sent-with santa-app-door" id="santa-open-app-row" hidden><a id="santa-open-app" href="#">Have Toayen? Open this in the app</a></p>
         </div>
 
         <div id="expired" class="empty" hidden>
@@ -1164,7 +1186,7 @@
                     } else if (payload.kind === 'birthdayCard') {
                         renderWish(payload);
                     } else if (payload.kind === 'secretSanta') {
-                        renderSanta(payload);
+                        renderSanta(payload, new Uint8Array(plain));
                     } else {
                         render(payload, new Uint8Array(plain));
                     }
@@ -1413,7 +1435,7 @@
         // A Secret Santa assignment (#483). The name exists on screen only
         // after the tap; the sealed face says whose link it is so a
         // misdirected link is obvious before it gives anything away.
-        function renderSanta(payload) {
+        function renderSanta(payload, plainBytes) {
             if (typeof payload.playerName !== 'string' || !payload.playerName.trim() ||
                 typeof payload.assigneeName !== 'string' || !payload.assigneeName.trim()) {
                 fail('broken');
@@ -1476,6 +1498,13 @@
                 openReveal(sealed, 'santa-open');
                 setupSantaQA(payload, assignee);
             }, { once: true });
+
+            // Hand the opened payload to the app via its custom scheme, same
+            // as the person and gift cards (#547) — the dependable door when
+            // the app is installed but the link opened in the browser anyway.
+            document.getElementById('santa-open-app').href =
+                'toayen://import?data=' + encodeURIComponent(bytesToB64url(plainBytes));
+            document.getElementById('santa-open-app-row').hidden = false;
 
             hide('loading');
             show('santa');
