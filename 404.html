@@ -572,7 +572,13 @@
             margin-bottom: 8px;
         }
 
-        .qa-thread { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+        .qa-thread { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;
+                     max-height: 240px; overflow-y: auto; }
+        /* Chat chrome (#570): quiet times, day markers, the two ends named. */
+        .qa-time { font-size: 10px; color: #999; margin: -2px 4px 0; }
+        .qa-time.mine { align-self: flex-end; }
+        .qa-day { font-size: 10px; color: #999; text-align: center; margin: 4px 0 2px; }
+        .qa-ends { display: flex; justify-content: space-between; font-size: 10px; color: #999; }
 
         .qa-message {
             font-size: 14px;
@@ -1011,6 +1017,7 @@
                 <p class="wish-from">Keep it to yourself. That's the game.</p>
                 <div id="qa-ask" class="qa-section" hidden>
                     <p class="qa-title" id="qa-ask-title"></p>
+                    <div class="qa-ends" id="qa-ask-ends" hidden><span id="qa-ask-other"></span><span>You</span></div>
                     <div class="qa-thread" id="qa-ask-thread"></div>
                     <div class="qa-input">
                         <input id="qa-ask-input" type="text" maxlength="500"
@@ -1021,6 +1028,7 @@
                 </div>
                 <div id="qa-inbox" class="qa-section" hidden>
                     <p class="qa-title">Questions for you, from your Santa</p>
+                    <div class="qa-ends" id="qa-inbox-ends" hidden><span>Your Santa</span><span>You</span></div>
                     <div class="qa-thread" id="qa-inbox-thread"></div>
                     <div class="qa-input">
                         <input id="qa-inbox-input" type="text" maxlength="500"
@@ -1604,6 +1612,7 @@
                 return decryptBody(message.body, keyString).then(function (plain) {
                     return {
                         from_asker: message.from_asker,
+                        created_at: message.created_at,
                         body: plain === null
                             ? 'Locked message — open the card from your own link to read it'
                             : plain
@@ -1612,13 +1621,40 @@
             })).then(function (unlocked) {
                 var container = document.getElementById(containerId);
                 container.textContent = '';
+                var lastDay = '';
                 for (var i = 0; i < unlocked.length; i++) {
                     var message = unlocked[i];
                     if (!message) { continue; }
+                    // Day separators + a quiet time under each bubble (#570).
+                    var when = message.created_at ? new Date(message.created_at) : null;
+                    if (when && !isNaN(when)) {
+                        var dayKey = when.toDateString();
+                        if (dayKey !== lastDay) {
+                            lastDay = dayKey;
+                            var day = document.createElement('div');
+                            day.className = 'qa-day';
+                            var today = new Date().toDateString() === dayKey;
+                            day.textContent = today ? 'Today'
+                                : when.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+                            container.appendChild(day);
+                        }
+                    }
+                    var mine = message.from_asker === mineWhenAsker;
                     var bubble = document.createElement('div');
-                    bubble.className = message.from_asker === mineWhenAsker ? 'qa-message mine' : 'qa-message';
+                    bubble.className = mine ? 'qa-message mine' : 'qa-message';
                     bubble.textContent = String(message.body).slice(0, 500);
                     container.appendChild(bubble);
+                    if (when && !isNaN(when)) {
+                        var time = document.createElement('div');
+                        time.className = mine ? 'qa-time mine' : 'qa-time';
+                        time.textContent = when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        container.appendChild(time);
+                    }
+                }
+                if (unlocked.length) {
+                    var ends = document.getElementById(containerId.replace('-thread', '-ends'));
+                    if (ends) { ends.hidden = false; }
+                    container.scrollTop = container.scrollHeight;
                 }
             });
         }
@@ -1687,6 +1723,7 @@
                 askSection.hidden = false;
                 document.getElementById('qa-ask-title').textContent =
                     'Ask ' + assignee.split(' ')[0] + ' something, anonymously';
+                document.getElementById('qa-ask-other').textContent = assignee.split(' ')[0];
                 wireSend('qa-ask-send', 'qa-ask-input', 'qa-ask-error', askToken, true, askKey);
             }
             if (inboxToken) {
