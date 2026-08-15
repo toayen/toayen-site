@@ -1062,6 +1062,31 @@
             <p>Part of the link seems to have been lost along the way. Ask the sender to share their card again from Toayen.</p>
         </div>
 
+        <!-- Card PINs (#565): a claimed card asks for its owner's PIN;
+             a Santa card's first opener is invited to claim it. -->
+        <div id="pin-entry" class="empty" hidden>
+            <h1>This card has a PIN</h1>
+            <p>Enter the PIN its owner set when they first opened it.</p>
+            <div class="qa-input" style="max-width:220px;margin:14px auto 0">
+                <input id="pin-entry-input" type="tel" inputmode="numeric" maxlength="4" pattern="[0-9]*"
+                       placeholder="4-digit PIN" autocomplete="one-time-code">
+                <button id="pin-entry-open" type="button">Open</button>
+            </div>
+            <p class="qa-error" id="pin-entry-error" hidden></p>
+        </div>
+
+        <div id="pin-setup" class="empty" hidden>
+            <h1>Protect your card</h1>
+            <p>Set a PIN only you know. From then on this link opens for nobody else &mdash; not even the organiser who sent it.</p>
+            <div class="qa-input" style="max-width:220px;margin:14px auto 0">
+                <input id="pin-setup-input" type="tel" inputmode="numeric" maxlength="4" pattern="[0-9]*"
+                       placeholder="Choose a 4-digit PIN">
+                <button id="pin-setup-set" type="button">Set PIN</button>
+            </div>
+            <p class="qa-error" id="pin-setup-error" hidden></p>
+            <p style="margin-top:12px"><a href="#" id="pin-setup-skip">Not now</a></p>
+        </div>
+
         <div id="notfound" class="empty" hidden>
             <h1>Page not found</h1>
             <p>There's nothing at this address. <a href="/">Back to toayen.co.uk</a></p>
@@ -1170,49 +1195,127 @@
             return;
         }
 
-        fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'get', code: code })
-        }).then(function (res) {
-            return res.json().then(function (body) { return { status: res.status, body: body }; });
-        }).then(function (result) {
-            if (result.status !== 200 || !result.body || typeof result.body.ciphertext !== 'string') {
+        // A claimed card (#565) refuses without its PIN; fetchCard retries
+        // with whatever the pin panel collects.
+        function fetchCard(pin) {
+            var request = { action: 'get', code: code };
+            if (pin) { request.pin = pin; }
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+            }).then(function (res) {
+                return res.json().then(function (body) { return { status: res.status, body: body }; });
+            }).then(function (result) {
                 var reason = result.body && result.body.error;
-                fail(reason === 'expired' ? 'expired' : reason === 'revoked' ? 'revoked' : 'broken');
+                if (reason === 'pin_required' || reason === 'pin_wrong' || reason === 'rate_limited') {
+                    hide('loading'); hide('pin-setup');
+                    show('pin-entry');
+                    var error = document.getElementById('pin-entry-error');
+                    error.hidden = (reason === 'pin_required');
+                    error.textContent = reason === 'rate_limited'
+                        ? 'Too many attempts \u2014 wait a minute and try again.'
+                        : 'That PIN isn\u2019t right. The organiser can reset it if it\u2019s forgotten.';
+                    return;
+                }
+                if (result.status !== 200 || !result.body || typeof result.body.ciphertext !== 'string') {
+                    fail(reason === 'expired' ? 'expired' : reason === 'revoked' ? 'revoked' : 'broken');
+                    return;
+                }
+                hide('pin-entry');
+                var pinSet = !!result.body.pin_set;
+                var combined;
+                try { combined = b64ToBytes(result.body.ciphertext); } catch (e) { fail('broken'); return; }
+                if (combined.length < 29 || combined.length > 65536) { fail('broken'); return; }
+
+                // CryptoKit's combined box is nonce (12) + ciphertext + tag (16);
+                // WebCrypto wants the nonce separately and the tag appended.
+                var iv = combined.slice(0, 12);
+                var sealed = combined.slice(12);
+
+                window.crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt'])
+                    .then(function (key) {
+                        return window.crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv, tagLength: 128 }, key, sealed);
+                    })
+                    .then(function (plain) {
+                        var payload = null;
+                        try { payload = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(plain))); } catch (e) {}
+                        if (!payload) { fail('broken'); return; }
+                        // Newer payload kinds (#276, #314). Person card JSON has
+                        // no `kind` at all, so nothing existing can misroute.
+                        var proceed = function () {
+                            if (payload.kind === 'gift') {
+                                renderGift(payload, new Uint8Array(plain));
+                            } else if (payload.kind === 'birthdayCard') {
+                                renderWish(payload);
+                            } else if (payload.kind === 'secretSanta') {
+                                renderSanta(payload, new Uint8Array(plain));
+                            } else {
+                                render(payload, new Uint8Array(plain));
+                            }
+                        };
+                        // First open of a Santa card (#565): the claim
+                        // stands between the fetch and the reveal.
+                        if (payload.kind === 'secretSanta' && !pinSet) {
+                            hide('loading');
+                            show('pin-setup');
+                            var input = document.getElementById('pin-setup-input');
+                            var error = document.getElementById('pin-setup-error');
+                            document.getElementById('pin-setup-set').addEventListener('click', function () {
+                                var pinChoice = input.value.trim();
+                                if (!/^[0-9]{4}$/.test(pinChoice)) {
+                                    error.textContent = 'Four digits, 0\u20139.';
+                                    error.hidden = false;
+                                    return;
+                                }
+                                fetch(API_URL, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action: 'set_pin', code: code, pin: pinChoice })
+                                }).then(function (res) { return res.json(); }).then(function (setResult) {
+                                    if (setResult && setResult.ok) {
+                                        hide('pin-setup');
+                                        proceed();
+                                    } else if (setResult && setResult.error === 'already_set') {
+                                        // Someone claimed it since our fetch —
+                                        // fall into the enter-PIN flow.
+                                        hide('pin-setup');
+                                        fetchCard(null);
+                                    } else {
+                                        error.textContent = 'Couldn\u2019t set the PIN \u2014 check your connection and try again.';
+                                        error.hidden = false;
+                                    }
+                                }).catch(function () {
+                                    error.textContent = 'Couldn\u2019t set the PIN \u2014 check your connection and try again.';
+                                    error.hidden = false;
+                                });
+                            }, { once: false });
+                            document.getElementById('pin-setup-skip').addEventListener('click', function (event) {
+                                event.preventDefault();
+                                hide('pin-setup');
+                                proceed();
+                            });
+                            return;
+                        }
+                        proceed();
+                    })
+                    .catch(function () { fail('broken'); });
+            }).catch(function () { fail('broken'); });
+        }
+
+        document.getElementById('pin-entry-open').addEventListener('click', function () {
+            var pin = document.getElementById('pin-entry-input').value.trim();
+            if (!/^[0-9]{4}$/.test(pin)) {
+                var error = document.getElementById('pin-entry-error');
+                error.textContent = 'Four digits, 0\u20139.';
+                error.hidden = false;
                 return;
             }
-            var combined;
-            try { combined = b64ToBytes(result.body.ciphertext); } catch (e) { fail('broken'); return; }
-            if (combined.length < 29 || combined.length > 65536) { fail('broken'); return; }
+            hide('pin-entry'); show('loading');
+            fetchCard(pin);
+        });
 
-            // CryptoKit's combined box is nonce (12) + ciphertext + tag (16);
-            // WebCrypto wants the nonce separately and the tag appended.
-            var iv = combined.slice(0, 12);
-            var sealed = combined.slice(12);
-
-            window.crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt'])
-                .then(function (key) {
-                    return window.crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv, tagLength: 128 }, key, sealed);
-                })
-                .then(function (plain) {
-                    var payload = null;
-                    try { payload = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(plain))); } catch (e) {}
-                    if (!payload) { fail('broken'); return; }
-                    // Newer payload kinds (#276, #314). Person card JSON has
-                    // no `kind` at all, so nothing existing can misroute.
-                    if (payload.kind === 'gift') {
-                        renderGift(payload, new Uint8Array(plain));
-                    } else if (payload.kind === 'birthdayCard') {
-                        renderWish(payload);
-                    } else if (payload.kind === 'secretSanta') {
-                        renderSanta(payload, new Uint8Array(plain));
-                    } else {
-                        render(payload, new Uint8Array(plain));
-                    }
-                })
-                .catch(function () { fail('broken'); });
-        }).catch(function () { fail('broken'); });
+        fetchCard(null);
 
         function detailRow(label, value) {
             var row = document.createElement('p');
