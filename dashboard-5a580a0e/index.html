@@ -299,6 +299,7 @@
     appstore: { t: "App Store", b: "Live version status straight from App Store Connect, the public star rating per storefront, and the latest written customer reviews. TestFlight feedback is separate — it auto-files as GitHub issues and shows under Work." },
     activity: { t: "Activity", b: "Anonymous in-app events from <b>all devices</b>, signed-in or not — so this is the truest picture of real usage. No personal data: just event counts by day and country." },
     devices: { t: "Push devices", b: "Devices that can receive a push notification — <b>not the same as users</b>. A device registers only when its owner is signed in <b>and</b> has allowed notifications; decline the prompt and it never appears here. It counts devices, not people: one person with an iPhone and an iPad counts twice, a user who declined notifications counts zero. <b>Tips &amp; offers</b> is the subset of registered devices that also left the marketing switch on — only those can receive campaign pushes." },
+    health: { t: "Server health", b: "How much of the Supabase plan the database is using, the tables that grow with usage, and <b>throttled callers</b> — clients currently being rate-limited (#566), which doubles as an abuse alarm. A red alert here means act this month, not this minute: the remedy is usually a plan upgrade, which is a button and a bill. A daily watcher files a GitHub issue when a threshold trips, so the board hears about capacity before the app feels it." },
     test: { t: "Test data", b: "Your own devices, TestFlight-era accounts, and Apple sandbox purchases. Hidden from every headline number so they reflect real customers — but kept, never deleted. Sandbox subscriptions behave strangely by design: an annual sub renews <b>every hour</b> during testing, which is why test 'revenue' looks huge." }
   };
 
@@ -559,6 +560,35 @@
     return section("Activity", inner, "activity");
   }
 
+  function bytesHuman(n) {
+    if (!isFinite(n)) return "—";
+    if (n >= 1073741824) return (n / 1073741824).toFixed(2) + " GB";
+    if (n >= 1048576) return (n / 1048576).toFixed(1) + " MB";
+    return Math.round(n / 1024) + " KB";
+  }
+
+  function healthHtml(s) {
+    if (!s.ok) return section("Server health", failed(s), "health");
+    var pct = s.db_percent_of_plan;
+    var tone = pct >= 70 ? "var(--bad)" : pct >= 40 ? "var(--warn)" : "var(--good)";
+    var inner = '<div class="big" style="color:' + tone + '">' + pct + "%<small>of database plan · " +
+      bytesHuman(s.db_bytes) + " of " + bytesHuman(s.plan_db_bytes) + "</small></div>";
+    if (s.alerts && s.alerts.length) {
+      inner += '<div class="err">' + s.alerts.map(esc).join("<br>") + "</div>";
+    }
+    inner += '<div class="grid3" style="margin-top:6px">' +
+      kv(num(s.throttled_now), "throttled callers") +
+      kv(num(s.tables_total), "tables") +
+      kv("", "") + "</div>";
+    if (s.tables && s.tables.length) {
+      inner += '<div class="list">' + bars(s.tables.map(function (t) {
+        return { l: t.name.replace(/_/g, " "), n: t.rows };
+      })) + "</div>";
+    }
+    inner += '<div class="note">Rows in the tables that grow with usage. The daily watcher files a GitHub issue if any threshold trips.</div>';
+    return section("Server health", inner, "health");
+  }
+
   function workSummaryHtml(s) {
     if (!s.ok) return section("Work", failed(s), "work");
     if (!s.connected) return section("Work", missing("GitHub not connected", "GITHUB_TOKEN"), "work");
@@ -654,6 +684,7 @@
       aiHtml(d.ai || {}) +
       appStoreHtml(d.appstore || {}) +
       activityHtml(d.activity || {}) +
+      healthHtml(d.health || {}) +
       workSummaryHtml(d.work || {});
     $("view-work").innerHTML = workPageHtml(d.work || {});
     var t = new Date(d.generated_at);
