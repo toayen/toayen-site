@@ -301,6 +301,11 @@
 
         .wish-skip.shown { opacity: 1; }
 
+        /* The santa card's rules pill carries no top margin of its own, so
+           it sat flush against the spending-cap line — give it clear air
+           above to match the card's rhythm (#552). */
+        #santa-rules { margin-top: 14px; }
+
         /* Candles: a flame of layered gradients breathing on detuned
            rhythms above either a numeral (milestones render the age
            itself) or a slim stick. */
@@ -1471,8 +1476,10 @@
                     }
                 }
                 if (rules.length) {
+                    // Named outright (#555): a bare gold line under the likes
+                    // read as more suggestions, not the rules of the game.
                     var rulesLine = document.getElementById('santa-rules');
-                    rulesLine.textContent = rules.join(' · ');
+                    rulesLine.textContent = 'House rules: ' + rules.join(' · ');
                     rulesLine.hidden = false;
                 }
             }
