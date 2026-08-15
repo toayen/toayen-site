@@ -1761,6 +1761,10 @@
 
             var skip = document.getElementById('wish-skip');
             window.setTimeout(function () {
+                // Reach the message inside four seconds (candles blown out
+                // fast) and this timer must not resurrect the button over
+                // the message it offered to skip to (#556).
+                if (stageDone) { return; }
                 skip.hidden = false;
                 window.requestAnimationFrame(function () { skip.classList.add('shown'); });
             }, 4000);
