@@ -1012,6 +1012,7 @@
                 <p class="card-subtitle">You have</p>
                 <h1 id="santa-name" class="card-name"></h1>
                 <p id="santa-budget" class="wish-from" hidden></p>
+                <p id="santa-exchange" class="wish-from" hidden></p>
                 <p id="santa-rules" class="wish-milestone" hidden></p>
                 <p id="santa-likes" class="wish-from" hidden></p>
                 <p class="wish-from">Keep it to yourself. That's the game.</p>
@@ -1584,6 +1585,22 @@
                 var budgetLine = document.getElementById('santa-budget');
                 budgetLine.textContent = 'Spending cap ' + text;
                 budgetLine.hidden = false;
+            }
+
+            // The exchange (#572): when and where the gifts change hands.
+            if (typeof payload.exchangeDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(payload.exchangeDate)) {
+                var exchangeParts = payload.exchangeDate.split('-');
+                var exchangeDay = new Date(+exchangeParts[0], +exchangeParts[1] - 1, +exchangeParts[2]);
+                if (!isNaN(exchangeDay)) {
+                    var exchangeText = 'Exchange: ' + exchangeDay.toLocaleDateString(undefined,
+                        { weekday: 'short', day: 'numeric', month: 'short' });
+                    if (typeof payload.exchangePlace === 'string' && payload.exchangePlace.trim()) {
+                        exchangeText += ' \u00B7 ' + payload.exchangePlace.trim().slice(0, 80);
+                    }
+                    var exchangeLine = document.getElementById('santa-exchange');
+                    exchangeLine.textContent = exchangeText;
+                    exchangeLine.hidden = false;
+                }
             }
 
             if (Array.isArray(payload.rules)) {
