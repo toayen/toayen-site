@@ -1539,30 +1539,106 @@
             }).then(function (res) { return res.json(); });
         }
 
-        function renderThread(containerId, messages, mineWhenAsker) {
-            var container = document.getElementById(containerId);
-            container.textContent = '';
-            for (var i = 0; i < messages.length; i++) {
-                var message = messages[i];
-                if (typeof message.body !== 'string') { continue; }
-                var bubble = document.createElement('div');
-                bubble.className = message.from_asker === mineWhenAsker ? 'qa-message mine' : 'qa-message';
-                bubble.textContent = message.body.slice(0, 500);
-                container.appendChild(bubble);
+        // ---- End-to-end encrypted messages (#568) --------------------------
+        // Bodies on a keyed thread are 'enc1:' + base64url(nonce || ct || tag),
+        // AES-GCM 128 — the exact box CryptoKit's `combined` produces, so the
+        // app and this page speak the same bytes. The key arrived inside the
+        // sealed card; the server only ever relays boxes it cannot open.
+        function b64urlToBytes(s) {
+            s = s.replace(/-/g, '+').replace(/_/g, '/');
+            while (s.length % 4) { s += '='; }
+            var bin = atob(s);
+            var bytes = new Uint8Array(bin.length);
+            for (var i = 0; i < bin.length; i++) { bytes[i] = bin.charCodeAt(i); }
+            return bytes;
+        }
+
+        function bytesToB64url(bytes) {
+            var bin = '';
+            for (var i = 0; i < bytes.length; i++) { bin += String.fromCharCode(bytes[i]); }
+            return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function importThreadKey(keyString) {
+            var raw = b64urlToBytes(keyString);
+            if (raw.length !== 16) { return Promise.reject(new Error('bad key')); }
+            return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+        }
+
+        function encryptBody(text, keyString) {
+            var iv = crypto.getRandomValues(new Uint8Array(12));
+            return importThreadKey(keyString).then(function (key) {
+                return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key,
+                    new TextEncoder().encode(text));
+            }).then(function (ct) {
+                var combined = new Uint8Array(12 + ct.byteLength);
+                combined.set(iv, 0);
+                combined.set(new Uint8Array(ct), 12);
+                return 'enc1:' + bytesToB64url(combined);
+            });
+        }
+
+        function decryptBody(body, keyString) {
+            // Plaintext (pre-#568 threads) passes through untouched.
+            if (typeof body !== 'string' || body.indexOf('enc1:') !== 0) {
+                return Promise.resolve(body);
             }
+            if (!keyString) { return Promise.resolve(null); }
+            var combined;
+            try { combined = b64urlToBytes(body.slice(5)); }
+            catch (e) { return Promise.resolve(null); }
+            if (combined.length < 29) { return Promise.resolve(null); }
+            return importThreadKey(keyString).then(function (key) {
+                return crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: combined.slice(0, 12) }, key, combined.slice(12));
+            }).then(function (plain) {
+                return new TextDecoder().decode(plain);
+            }).catch(function () { return null; });
+        }
+
+        function renderThread(containerId, messages, mineWhenAsker, keyString) {
+            // Unlock everything first (async), then paint in one pass so the
+            // thread never flashes ciphertext.
+            Promise.all(messages.map(function (message) {
+                if (typeof message.body !== 'string') { return Promise.resolve(null); }
+                return decryptBody(message.body, keyString).then(function (plain) {
+                    return {
+                        from_asker: message.from_asker,
+                        body: plain === null
+                            ? 'Locked message — open the card from your own link to read it'
+                            : plain
+                    };
+                });
+            })).then(function (unlocked) {
+                var container = document.getElementById(containerId);
+                container.textContent = '';
+                for (var i = 0; i < unlocked.length; i++) {
+                    var message = unlocked[i];
+                    if (!message) { continue; }
+                    var bubble = document.createElement('div');
+                    bubble.className = message.from_asker === mineWhenAsker ? 'qa-message mine' : 'qa-message';
+                    bubble.textContent = String(message.body).slice(0, 500);
+                    container.appendChild(bubble);
+                }
+            });
         }
 
         function setupSantaQA(payload, assignee) {
             var askToken = validToken(payload.askToken) ? payload.askToken : null;
             var inboxToken = validToken(payload.inboxToken) ? payload.inboxToken : null;
             if (!askToken && !inboxToken) { return; }
+            // Thread keys (#568): same shape check as the tokens. A keyed
+            // thread is locked end to end; without keys the thread behaves
+            // as before (pre-#568 draws).
+            var askKey = validToken(payload.askKey) ? payload.askKey : null;
+            var inboxKey = validToken(payload.inboxKey) ? payload.inboxKey : null;
             document.getElementById('qa-note').hidden = false;
 
             function refresh() {
                 if (askToken) {
                     santaCall({ action: 'santa_fetch', token: askToken }).then(function (result) {
                         if (result && Array.isArray(result.messages)) {
-                            renderThread('qa-ask-thread', result.messages, true);
+                            renderThread('qa-ask-thread', result.messages, true, askKey);
                         }
                     }).catch(function () {});
                 }
@@ -1571,10 +1647,39 @@
                         if (result && Array.isArray(result.messages)) {
                             var section = document.getElementById('qa-inbox');
                             if (result.messages.length) { section.hidden = false; }
-                            renderThread('qa-inbox-thread', result.messages, false);
+                            renderThread('qa-inbox-thread', result.messages, false, inboxKey);
                         }
                     }).catch(function () {});
                 }
+            }
+
+            // Honest sends (#554): the input clears only when the server said
+            // ok — anything else keeps the words and says so. (fetch resolves
+            // on HTTP errors, so the ok check matters as much as the catch.)
+            // On a keyed thread (#568) the body is locked before it leaves
+            // this page; a key that won't work is treated as a failed send.
+            function wireSend(buttonId, inputId, errorId, token, fromAsker, keyString) {
+                document.getElementById(buttonId).addEventListener('click', function () {
+                    var input = document.getElementById(inputId);
+                    var error = document.getElementById(errorId);
+                    var text = input.value.trim();
+                    if (!text) { return; }
+                    var prepared = keyString
+                        ? encryptBody(text, keyString)
+                        : Promise.resolve(text);
+                    prepared.then(function (wireBody) {
+                        return santaCall({ action: 'santa_post', token: token,
+                                           from_asker: fromAsker, body: wireBody });
+                    }).then(function (result) {
+                        if (result && result.ok) {
+                            input.value = '';
+                            error.hidden = true;
+                            refresh();
+                        } else {
+                            error.hidden = false;
+                        }
+                    }).catch(function () { error.hidden = false; });
+                });
             }
 
             if (askToken) {
@@ -1582,46 +1687,10 @@
                 askSection.hidden = false;
                 document.getElementById('qa-ask-title').textContent =
                     'Ask ' + assignee.split(' ')[0] + ' something, anonymously';
-                document.getElementById('qa-ask-send').addEventListener('click', function () {
-                    var input = document.getElementById('qa-ask-input');
-                    var error = document.getElementById('qa-ask-error');
-                    var text = input.value.trim();
-                    if (!text) { return; }
-                    // Honest sends (#554): the input clears only when the
-                    // server said ok — anything else keeps the words and
-                    // says so. (fetch resolves on HTTP errors, so the ok
-                    // check matters as much as the catch.)
-                    santaCall({ action: 'santa_post', token: askToken, from_asker: true, body: text })
-                        .then(function (result) {
-                            if (result && result.ok) {
-                                input.value = '';
-                                error.hidden = true;
-                                refresh();
-                            } else {
-                                error.hidden = false;
-                            }
-                        })
-                        .catch(function () { error.hidden = false; });
-                });
+                wireSend('qa-ask-send', 'qa-ask-input', 'qa-ask-error', askToken, true, askKey);
             }
             if (inboxToken) {
-                document.getElementById('qa-inbox-send').addEventListener('click', function () {
-                    var input = document.getElementById('qa-inbox-input');
-                    var error = document.getElementById('qa-inbox-error');
-                    var text = input.value.trim();
-                    if (!text) { return; }
-                    santaCall({ action: 'santa_post', token: inboxToken, from_asker: false, body: text })
-                        .then(function (result) {
-                            if (result && result.ok) {
-                                input.value = '';
-                                error.hidden = true;
-                                refresh();
-                            } else {
-                                error.hidden = false;
-                            }
-                        })
-                        .catch(function () { error.hidden = false; });
-                });
+                wireSend('qa-inbox-send', 'qa-inbox-input', 'qa-inbox-error', inboxToken, false, inboxKey);
             }
             refresh();
         }
