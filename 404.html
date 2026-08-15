@@ -614,6 +614,11 @@
         }
 
         .qa-note { font-size: 11px; color: #999; margin-top: 8px; }
+        /* A failed send says so and keeps the words (#554). */
+        .qa-error { font-size: 11px; color: #B07156; margin-top: 6px; }
+        @media (prefers-color-scheme: dark) {
+            .qa-error { color: #C9907A; }
+        }
 
         /* Confetti: while held, the sealed card draws tight and shimmers. */
         .wish-sealed.holding {
@@ -1012,6 +1017,7 @@
                                placeholder="Sizes, colours, already-owned checks">
                         <button id="qa-ask-send" type="button">Ask</button>
                     </div>
+                    <p class="qa-error" id="qa-ask-error" hidden>Couldn&rsquo;t send &mdash; check your connection and try again. Your words are still here.</p>
                 </div>
                 <div id="qa-inbox" class="qa-section" hidden>
                     <p class="qa-title">Questions for you, from your Santa</p>
@@ -1021,6 +1027,7 @@
                                placeholder="Answer without knowing who asked">
                         <button id="qa-inbox-send" type="button">Reply</button>
                     </div>
+                    <p class="qa-error" id="qa-inbox-error" hidden>Couldn&rsquo;t send &mdash; check your connection and try again. Your words are still here.</p>
                 </div>
                 <p class="qa-note" id="qa-note" hidden>Answers arrive on this card. Check back, nobody is told who asked.</p>
                 <p class="wish-sent-with">Drawn with <a href="https://toayen.co.uk">Toayen</a></p>
@@ -1577,21 +1584,43 @@
                     'Ask ' + assignee.split(' ')[0] + ' something, anonymously';
                 document.getElementById('qa-ask-send').addEventListener('click', function () {
                     var input = document.getElementById('qa-ask-input');
+                    var error = document.getElementById('qa-ask-error');
                     var text = input.value.trim();
                     if (!text) { return; }
+                    // Honest sends (#554): the input clears only when the
+                    // server said ok — anything else keeps the words and
+                    // says so. (fetch resolves on HTTP errors, so the ok
+                    // check matters as much as the catch.)
                     santaCall({ action: 'santa_post', token: askToken, from_asker: true, body: text })
-                        .then(function () { input.value = ''; refresh(); })
-                        .catch(function () {});
+                        .then(function (result) {
+                            if (result && result.ok) {
+                                input.value = '';
+                                error.hidden = true;
+                                refresh();
+                            } else {
+                                error.hidden = false;
+                            }
+                        })
+                        .catch(function () { error.hidden = false; });
                 });
             }
             if (inboxToken) {
                 document.getElementById('qa-inbox-send').addEventListener('click', function () {
                     var input = document.getElementById('qa-inbox-input');
+                    var error = document.getElementById('qa-inbox-error');
                     var text = input.value.trim();
                     if (!text) { return; }
                     santaCall({ action: 'santa_post', token: inboxToken, from_asker: false, body: text })
-                        .then(function () { input.value = ''; refresh(); })
-                        .catch(function () {});
+                        .then(function (result) {
+                            if (result && result.ok) {
+                                input.value = '';
+                                error.hidden = true;
+                                refresh();
+                            } else {
+                                error.hidden = false;
+                            }
+                        })
+                        .catch(function () { error.hidden = false; });
                 });
             }
             refresh();
