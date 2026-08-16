@@ -963,6 +963,9 @@
                 <div id="gift-avatar" class="avatar" aria-hidden="true"></div>
                 <h1 id="gift-title" class="card-name"></h1>
                 <p id="gift-subtitle" class="card-subtitle" hidden></p>
+                <!-- The idea's description (toayen-ios#276 round 2) - the
+                     why behind the what, when the sender wrote one. -->
+                <p id="gift-description" class="card-subtitle" hidden></p>
             </div>
             <div id="gift-details" class="card-section" hidden></div>
         </div>
@@ -1455,6 +1458,12 @@
                 var subtitle = document.getElementById('gift-subtitle');
                 subtitle.textContent = 'Sent by ' + payload.senderName.trim().slice(0, 100);
                 subtitle.hidden = false;
+            }
+
+            if (typeof payload.giftDescription === 'string' && payload.giftDescription.trim()) {
+                var description = document.getElementById('gift-description');
+                description.textContent = payload.giftDescription.trim().slice(0, 500);
+                description.hidden = false;
             }
 
             var details = document.getElementById('gift-details');
