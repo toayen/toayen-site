@@ -1058,6 +1058,13 @@
             <p>The sender retired it, usually because a fresh one is on its way. Ask them for their newest link.</p>
         </div>
 
+        <!-- The organiser deleted the draw (#607): a message, not a stale
+             link — nothing for this player to do. -->
+        <div id="cancelled" class="empty" hidden>
+            <h1>This Secret Santa was cancelled</h1>
+            <p>The organiser called the game off, so this card no longer applies. Nothing to do — if a new draw happens, a fresh link will find you.</p>
+        </div>
+
         <div id="broken" class="empty" hidden>
             <h1>This card link looks incomplete</h1>
             <p>Part of the link seems to have been lost along the way. Ask the sender to share their card again from Toayen.</p>
@@ -1220,7 +1227,7 @@
                     return;
                 }
                 if (result.status !== 200 || !result.body || typeof result.body.ciphertext !== 'string') {
-                    fail(reason === 'expired' ? 'expired' : reason === 'revoked' ? 'revoked' : 'broken');
+                    fail(reason === 'expired' ? 'expired' : reason === 'revoked' ? 'revoked' : reason === 'cancelled' ? 'cancelled' : 'broken');
                     return;
                 }
                 hide('pin-entry');
