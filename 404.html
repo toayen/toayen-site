@@ -2,6 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!--
+        Shotmaker match invites (/shotmaker/m/CODE) are not cards: they go
+        straight to Shotmaker's own page, the code moved into the fragment so
+        it is never sent to a server. Runs before anything else here.
+    -->
+    <script>
+        (function () {
+            var m = location.pathname.match(/^\/shotmaker\/m\/([A-Za-z2-9]{8})\/?$/);
+            if (m) location.replace('/shotmaker/m/#' + m[1].toUpperCase());
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
     <!-- The unseal key rides in the URL path, so the Referer header would

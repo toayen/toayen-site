@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <meta name="referrer" content="no-referrer">
+    <title>A Shotmaker match</title>
+    <!--
+        A Shotmaker match invite for someone whose phone did not open the app
+        (issue 127). Links look like /shotmaker/m/CODE; 404.html moves the code
+        into the fragment (/shotmaker/m/#CODE) so it is never sent to a server.
+        On an iPhone with Shotmaker installed, the link opens the app instead
+        (the apple-app-site-association file). This page fetches nothing and
+        stores nothing: it only shows the code to type into the app.
+        Shotmaker's own look (paper and ink, the lime ball), not the gift
+        app's: the two products share no brand.
+    -->
+    <style>
+        :root {
+            --paper: #F4F3EF;
+            --ink: #0B0C0E;
+            --rule: #D6D5CF;
+            --quiet: #5B6067;
+            --lime: #AEE122;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --paper: #0B0C0E;
+                --ink: #F4F3EF;
+                --rule: #2B2E33;
+                --quiet: #9DA2A9;
+                --lime: #CDF65A;
+            }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 48px 24px;
+        }
+        main { width: 100%; max-width: 440px; }
+        .mark { display: flex; align-items: center; gap: 10px; font-size: 15px; letter-spacing: 0.5px; margin-bottom: 40px; }
+        .ball { width: 10px; height: 10px; border-radius: 50%; background: var(--lime); }
+        h1 { font-weight: 300; font-size: 34px; line-height: 1.1; text-transform: lowercase; margin-bottom: 16px; }
+        p { font-size: 16px; line-height: 1.5; color: var(--quiet); }
+        .label { font-size: 13px; color: var(--quiet); text-transform: lowercase; margin: 36px 0 8px; }
+        .code {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+            padding: 16px 0;
+        }
+        .code span { font-size: 30px; font-weight: 500; letter-spacing: 4px; font-variant-numeric: tabular-nums; }
+        button {
+            font: inherit; font-size: 15px; text-transform: lowercase;
+            color: var(--paper); background: var(--ink);
+            border: 0; border-radius: 3px; padding: 10px 16px; cursor: pointer;
+        }
+        ol { margin: 8px 0 0 20px; color: var(--quiet); font-size: 16px; line-height: 1.6; }
+        .missing { display: none; }
+        footer { margin-top: 48px; font-size: 13px; color: var(--quiet); }
+        footer a { color: var(--quiet); }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="mark"><span class="ball"></span>shotmaker</div>
+
+        <h1>a match invite</h1>
+        <p>A friend has asked you to play them at Shotmaker, the golf game for iPhone. You play the same holes in the same wind, each in your own time while the match is open.</p>
+
+        <div id="found">
+            <div class="label">the code</div>
+            <div class="code">
+                <span id="code"></span>
+                <button id="copy" type="button">copy</button>
+            </div>
+
+            <div class="label">how to join</div>
+            <ol>
+                <li>Open Shotmaker on your iPhone.</li>
+                <li>Choose Matches, then Join with a code.</li>
+                <li>Type the code above, and join the match.</li>
+            </ol>
+        </div>
+
+        <div id="missing" class="missing">
+            <div class="label">the code</div>
+            <p>This link has lost its code. Ask your friend to send it again, or to tell you the eight letters and numbers from their match page.</p>
+        </div>
+
+        <div class="label">getting shotmaker</div>
+        <p>Shotmaker is not in the App Store yet. If you have been sent a test version through TestFlight, install that, and the link will open the match straight away next time.</p>
+
+        <footer>Shotmaker by Toayen.</footer>
+    </main>
+    <script>
+        (function () {
+            // A code is eight characters with no 0, 1, I or O (the server's alphabet).
+            var raw = (location.hash || '').replace(/^#/, '').toUpperCase().replace(/[\s-]/g, '');
+            var ok = /^[2-9A-HJ-NP-Z]{8}$/.test(raw);
+            document.getElementById('found').style.display = ok ? 'block' : 'none';
+            document.getElementById('missing').style.display = ok ? 'none' : 'block';
+            if (!ok) return;
+            document.getElementById('code').textContent = raw;
+            var copy = document.getElementById('copy');
+            copy.addEventListener('click', function () {
+                if (!navigator.clipboard) return;
+                navigator.clipboard.writeText(raw).then(function () { copy.textContent = 'copied'; });
+            });
+        })();
+    </script>
+</body>
+</html>
