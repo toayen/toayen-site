@@ -80,3 +80,7 @@ details p{margin-top:10px}
 .post pre{margin:0;white-space:pre-wrap;word-wrap:break-word;font-family:var(--body);font-size:15.5px;line-height:1.5;max-width:68ch}
 .post .media{font-size:14px}
 .copy{align-self:flex-start;font:inherit;font-size:14px;text-transform:lowercase;background:var(--ink);color:var(--ground);border:0;border-radius:6px;padding:8px 14px;cursor:pointer}
+table.data th{width:auto}
+table.data thead th{border-bottom:2px solid var(--ink)}
+table.data tbody th{text-transform:none;color:var(--ink);font-size:15px;font-weight:600;width:42%}
+.prose ul.clean{gap:10px}
