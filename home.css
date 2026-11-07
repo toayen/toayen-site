@@ -1,0 +1,228 @@
+/* Toayen's umbrella pages (7 Nov 2026): the home page, which presents the two
+ * kinds of app, and the Games landing page. The gift app's page moved to /life/.
+ *
+ * Built on landing.css (its tokens, type and .lp- top bar and footer); every
+ * selector here is prefixed th- so nothing on the gift app's pages changes.
+ * Shotmaker's own colours appear only inside the Shotmaker card, as on its
+ * own site. */
+
+.th-kicker {
+    margin: 18px 0 0;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--lp-muted);
+}
+
+.th-kicker a { color: var(--lp-muted); text-decoration: none; }
+.th-kicker a:hover { color: var(--lp-text); }
+
+.th-hero { padding: 40px 0 8px; display: grid; gap: 16px; }
+
+.th-hero h1 {
+    font-size: 38px;
+    line-height: 1.1;
+    letter-spacing: -.4px;
+    margin: 0;
+    max-width: 18ch;
+}
+
+.th-hero h1 .lp-soft { color: var(--lp-muted); display: block; }
+
+.th-hero p {
+    margin: 0;
+    font-size: 17px;
+    color: var(--lp-body);
+    max-width: 48ch;
+}
+
+/* The two kinds of app, as two cards of equal weight. */
+.th-cats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 22px;
+    padding: 40px 0 24px;
+}
+
+.th-cat {
+    display: flex;
+    flex-direction: column;
+    background: var(--lp-card);
+    border: 1px solid var(--lp-border);
+    border-radius: 18px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--lp-text);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+a.th-cat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px -24px rgba(0, 0, 0, .35);
+}
+
+.th-cat-media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+}
+
+.th-cat-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* The gift app's framed phone stands on a soft rose ground, cut at the foot. */
+.th-cat-media.th-life {
+    background: color-mix(in oklab, var(--lp-tint) 16%, var(--lp-bg));
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 7%;
+}
+
+.th-cat-media.th-life img {
+    width: 38%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 18px 28px rgba(0, 0, 0, .18));
+}
+
+.th-cat-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 24px 24px 26px;
+    flex: 1;
+}
+
+.th-cat-body .th-label {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--lp-muted);
+}
+
+.th-cat-body h2 { margin: 0; font-size: 30px; line-height: 1.1; }
+
+.th-cat-body p { margin: 0; color: var(--lp-body); max-width: 46ch; }
+
+.th-apps {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--lp-divider);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 15px;
+}
+
+.th-apps li { display: flex; justify-content: space-between; gap: 12px; }
+.th-apps .th-state { color: var(--lp-muted); font-size: 14px; }
+
+.th-go {
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.th-go::after { content: " \2192"; }
+
+/* Games: Shotmaker in its own colours, carbon with the lime ball. */
+.th-game {
+    display: grid;
+    grid-template-columns: 1fr;
+    background: #0B0C0E;
+    color: #F4F3EF;
+    border-radius: 18px;
+    overflow: hidden;
+    margin: 40px 0 16px;
+}
+
+.th-game-media img { display: block; width: 100%; height: 100%; object-fit: cover; aspect-ratio: 16 / 10; }
+
+.th-game-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 28px 26px 30px;
+}
+
+.th-game .th-label { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: #9DA2A9; }
+
+.lp .th-wordmark {
+    font-family: "Mona Sans", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700;
+    font-stretch: 115%;
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: -.02em;
+    text-transform: lowercase;
+    margin: 0;
+}
+
+.lp .th-wordmark .th-dot {
+    display: inline-block;
+    width: .3em;
+    height: .3em;
+    margin-left: 2px;
+    border-radius: 50%;
+    background: #CDF65A;
+}
+
+.th-game p { margin: 0; color: #D9D8D2; max-width: 44ch; }
+.th-game .th-promo { color: #F4F3EF; font-size: 19px; line-height: 1.45; }
+
+.th-game-links { display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: center; margin-top: 6px; }
+.lp .th-game a { color: #F4F3EF; }
+
+.th-button {
+    display: inline-block;
+    background: #F4F3EF;
+    border-radius: 10px;
+    padding: 11px 18px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.lp .th-game a.th-button { color: #0B0C0E; }
+
+.th-soon {
+    font-size: 14px;
+    color: #9DA2A9;
+}
+
+.th-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0 0 24px;
+}
+
+.th-strip figure { margin: 0; }
+.th-strip img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 10px; }
+.th-strip figcaption { font-size: 13px; color: var(--lp-muted); margin-top: 6px; }
+
+.th-more { padding: 28px 0 8px; border-top: 1px solid var(--lp-divider); margin-top: 24px; }
+.th-more h2 { margin: 0 0 8px; font-size: 24px; }
+.th-more p { margin: 0; color: var(--lp-body); max-width: 56ch; }
+
+@media (min-width: 720px) {
+    .th-hero { padding: 72px 0 8px; }
+    .th-hero h1 { font-size: 56px; letter-spacing: -1px; }
+    .th-cats { grid-template-columns: 1fr 1fr; gap: 28px; padding-top: 56px; }
+    .th-game { grid-template-columns: 1.1fr 1fr; }
+    .th-game-media img { aspect-ratio: auto; min-height: 100%; }
+    .th-game-body { padding: 40px 40px 42px; justify-content: center; }
+    .lp .th-wordmark { font-size: 52px; }
+    .th-strip { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .th-cat { transition: none; }
+    a.th-cat:hover { transform: none; }
+}
