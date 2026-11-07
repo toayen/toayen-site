@@ -102,3 +102,4 @@ img.phone{border-radius:28px;width:100%;max-width:300px;justify-self:end;box-sha
 .downloads figcaption{font-size:14px}
 img.icon{width:120px;border-radius:27px;box-shadow:0 0 0 1px var(--rule)}
 @media (max-width:720px){img.phone{justify-self:start;max-width:240px}.downloads{grid-template-columns:1fr}}
+.sig{margin-top:6px;margin-bottom:-4px}
