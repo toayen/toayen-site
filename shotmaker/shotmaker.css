@@ -84,3 +84,21 @@ table.data th{width:auto}
 table.data thead th{border-bottom:2px solid var(--ink)}
 table.data tbody th{text-transform:none;color:var(--ink);font-size:15px;font-weight:600;width:42%}
 .prose ul.clean{gap:10px}
+/* pictures (7 Nov 2026): the store screenshots and course pictures in place of the slots */
+img{display:block;max-width:100%;height:auto}
+img.phone{border-radius:28px;width:100%;max-width:300px;justify-self:end;box-shadow:0 0 0 1px var(--rule),0 24px 48px -24px rgba(11,12,14,.35)}
+.course img.pic{width:100%;aspect-ratio:1206/760;object-fit:cover;border-radius:6px}
+.shots figure{margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.shots img{border-radius:14px;width:100%;aspect-ratio:1320/2868;object-fit:cover;box-shadow:0 0 0 1px var(--rule)}
+.shots figcaption{font-size:14px;font-weight:600}
+.shots figcaption span{display:block;font-weight:400;color:var(--quiet);font-size:13px}
+.shots a{text-decoration:none}
+.soon{display:inline-flex;flex-direction:column;justify-content:center;gap:0;min-width:160px;height:54px;padding:6px 16px;border:1.5px solid var(--ink);border-radius:10px;line-height:1.2}
+.soon .label{font-size:12px}
+.soon b{font-size:17px;font-weight:650;font-stretch:108%}
+.downloads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.downloads figure{margin:0;display:flex;flex-direction:column;gap:8px}
+.downloads img{border-radius:6px;box-shadow:0 0 0 1px var(--rule)}
+.downloads figcaption{font-size:14px}
+img.icon{width:120px;border-radius:27px;box-shadow:0 0 0 1px var(--rule)}
+@media (max-width:720px){img.phone{justify-self:start;max-width:240px}.downloads{grid-template-columns:1fr}}
